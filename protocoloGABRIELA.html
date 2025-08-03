@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Protocolo de Treino - Ana Gabriela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB; /* Fundo claro */
+            color: #111827; /* Cor do texto padrão escura */
+        }
+        .main-title {
+            color: #F97316;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .card {
+            background-color: #FFFFFF; /* Fundo do card branco */
+            border-left: 4px solid #F97316;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .icon {
+            color: #F97316;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-button {
+            background-color: #E5E7EB; /* Fundo do botão inativo claro */
+            color: #374151; /* Texto do botão inativo escuro */
+            transition: all 0.3s ease;
+            flex: 1 1 0px;
+            min-width: 100px;
+        }
+        .tab-button.active {
+            background-color: #F97316;
+            color: #FFFFFF; /* Texto do botão ativo branco */
+            font-weight: 700;
+        }
+        .workout-table th {
+            background-color: #F3F4F6; /* Fundo do cabeçalho da tabela claro */
+            color: #F97316;
+        }
+        .workout-table tr:nth-child(even) {
+            background-color: #F9FAFB; /* Fundo da linha par claro */
+        }
+        .golden-filter {
+            filter: brightness(0) saturate(100%) invert(65%) sepia(50%) saturate(1500%) hue-rotate(355deg) brightness(100%) contrast(95%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center my-12">
+            <h1 class="text-4xl md:text-6xl font-black main-title mb-2">PROTOCOLO DE TREINO</h1>
+            <p class="text-xl md:text-2xl font-bold text-black">Ana Gabriela Dos Santos Oliveira</p>
+            <p class="text-lg text-black mt-2">Objetivo: Adaptação Morfológica Hipertrofia</p>
+        </header>
+
+        <section id="core-principles" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-black">Boas condutas a serem seguidas</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-black">Para que seus resultados sejam maximizados é necessario que alguns pilares sejam seguidos.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon text-5xl mb-3">🎯</div>
+                    <h3 class="font-bold text-xl mb-2 text-black">Padrão de Movimento</h3>
+                    <p class="text-black">A execução deve ser padronizada, mantenha o padrão orientado e progrida em cima dele.</p>
+                </div>
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon text-5xl mb-3">📈</div>
+                    <h3 class="font-bold text-xl mb-2 text-black">Progressão de Carga</h3>
+                    <p class="text-black">Busque progredir a cada sessão! Alocando ao menos 1kg a mais ou adicionando repetições mas se mantendo dentro da margem prescrita.</p>
+                </div>
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon h-28 flex justify-center items-center mb-3">
+                        <img src="https://i.imgur.com/sdyiGs7.png" alt="Ilustração de Unidade Motora" class="h-full object-contain">
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-black">Empregue Esforço</h3>
+                    <p class="text-black">Se esforçar durante as séries é uma das premissas da hipertrofia, se aproxime da falha de forma com que seja possivel notar a lentificação invonluntaria das repetições ao decorrer da série.</p>
+                </div>
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon text-5xl mb-3">⏱️</div>
+                    <h3 class="font-bold text-xl mb-2 text-black">Descanso Inteligente</h3>
+                    <p class="text-black">No minimo 2 minutos de descanso entre as séries. O descanso adequado permite a extrair o melhor das series subsequentes, evitando um grande declineo na performance.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="weekly-split" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-black">Divisão de Treino: L/U 2x</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-black">Sua divisão terá uma frequencia de 2 vezes na semana por grupamento muscular, que é evidenciado pela literatura como producente para hipertrofia.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 w-full max-w-5xl mx-auto">
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-cyan-600">Segunda</p>
+                    <p class="font-semibold text-black">Lower 1</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-cyan-600">Terça</p>
+                    <p class="font-semibold text-black">Upper 1</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-red-100 border border-red-200 w-full md:w-auto">
+                    <p class="font-bold text-lg text-red-600">Quarta</p>
+                    <p class="font-semibold text-black">Off</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-cyan-600">Quinta</p>
+                    <p class="font-semibold text-black">Lower 2</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-cyan-600">Sexta</p>
+                    <p class="font-semibold text-black">Upper 2</p>
+                </div>
+            </div>
+            <div class="text-center mt-6">
+                <p class="font-bold text-lg text-red-700">Sábado & Domingo: <span class="font-semibold text-black">Descanso Total</span></p>
+            </div>
+        </section>
+
+        <section id="muscle-focus" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-black">Foco Muscular do Programa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-4 text-center text-black">Distribuição de Volume Semanal</h3>
+                    <div class="chart-container">
+                        <canvas id="muscleFocusChart"></canvas>
+                    </div>
+                </div>
+                <div id="muscle-focus-text" class="text-black text-lg">
+                     <p>O gráfico de radar ilustra a distribuição de séries semanais por grupo muscular. Pontos mais distantes do centro indicam maior volume de treino.</p>
+                     <p class="mt-2"><span class="text-blue-600 font-bold">O Volume de treino</span> é uma variavel extremamente importante a se controlar, a Literatura é consistente em dizer que há uma relação dose-reposta entre volume de treino e hipertrofia mais isso não é infinito, é necessario avaliar sua recuperação entre as sessões através da progressão de carga.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workout-details" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12 text-black">Seu Treino Detalhado</h2>
+            <div class="w-full max-w-5xl mx-auto">
+                <div id="tab-buttons" class="flex flex-wrap justify-center border-b border-gray-200 mb-6">
+                    <!-- Botões das abas serão inseridos aqui -->
+                </div>
+                <div id="tab-content" class="bg-white p-4 sm:p-6 rounded-b-lg shadow-lg min-h-[300px]">
+                    <!-- Conteúdo do treino será inserido aqui -->
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workoutData = {
+                workouts: {
+                    lower1: {
+                        tabName: 'Lower 1',
+                        title: 'Treino de Inferiores 1',
+                        description: 'Foco no desenvolvimento de posteriores e quadríceps.',
+                        exercises: [
+                            { name: 'Mesa Flexora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Agachamento Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Extensão de Quadril na Polia', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Adutora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    upper1: {
+                        tabName: 'Upper 1',
+                        title: 'Treino de Superiores 1',
+                        description: 'Foco em costas, ombros e braços.',
+                        exercises: [
+                            { name: 'Remada Serrote com Halteres', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Desenvolvimento com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Puxada Triângulo', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Tríceps na Barra V', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Rosca Alternada com Halter', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Abdominal na Máquina', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    lower2: {
+                        tabName: 'Lower 2',
+                        title: 'Treino de Inferiores 2',
+                        description: 'Segundo dia com ênfase em glúteos e posteriores.',
+                        exercises: [
+                            { name: 'Afundo no Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Stiff com Barra', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Levantamento Pélvico na Máquina', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Abdução de Quadril na Polia', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    upper2: {
+                        tabName: 'Upper 2',
+                        title: 'Treino de Superiores 2',
+                        description: 'Segundo dia com foco em volume para costas e ombros.',
+                        exercises: [
+                            { name: 'Remada com Peito Apoiado', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Elevação Lateral com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Puxada com Pegada Anatômica', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Tríceps na Paralela (Máquina)', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Rosca na Barra (Polia)', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    }
+                },
+                muscleFocusData: {
+                    'Posteriores/Glúteos': 11,
+                    'Quadríceps': 10,
+                    'Costas': 6,
+                    'Panturrilhas': 6,
+                    'Ombros': 4,
+                    'Tríceps': 4,
+                    'Bíceps': 4,
+                    'Abdômen': 3
+                }
+            };
+
+            const ctx = document.getElementById('muscleFocusChart').getContext('2d');
+            const muscleFocusChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(workoutData.muscleFocusData),
+                    datasets: [{
+                        label: 'Séries Semanais',
+                        data: Object.values(workoutData.muscleFocusData),
+                        backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                        borderColor: '#F97316',
+                        pointBackgroundColor: '#F97316',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#F97316'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.4)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.4)' },
+                            pointLabels: { color: '#111827', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                color: '#F9FAFB',
+                                backdropColor: 'rgba(0, 0, 0, 0.7)',
+                                backdropPadding: 4,
+                                borderRadius: 4,
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 12
+                        }
+                    }
+                }
+            });
+
+            const tabButtonsContainer = document.getElementById('tab-buttons');
+            const tabContentContainer = document.getElementById('tab-content');
+            
+            tabContentContainer.innerHTML = ''; 
+
+            Object.keys(workoutData.workouts).forEach(key => {
+                const workout = workoutData.workouts[key];
+                const button = document.createElement('button');
+                button.className = 'tab-button text-center p-4 rounded-t-lg';
+                button.dataset.tab = key;
+                button.textContent = workout.tabName;
+                tabButtonsContainer.appendChild(button);
+
+                let tableRows = '';
+                workout.exercises.forEach(ex => {
+                    tableRows += `
+                        <tr class="border-b border-gray-200">
+                            <td class="p-3 font-semibold text-black">${ex.name}</td>
+                            <td class="p-3 text-center text-black">${ex.sets}</td>
+                            <td class="p-3 text-center text-black">${ex.reps}</td>
+                            <td class="p-3 text-black hidden md:table-cell">${ex.obs}</td>
+                        </tr>
+                    `;
+                });
+
+                const contentDiv = document.createElement('div');
+                contentDiv.id = key;
+                contentDiv.className = 'hidden';
+                contentDiv.innerHTML = `
+                    <h3 class="font-bold text-2xl text-black mb-2">${workout.title}</h3>
+                    <p class="text-gray-700 mb-6">${workout.description}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left workout-table rounded-lg overflow-hidden">
+                            <thead>
+                                <tr>
+                                    <th class="p-3">Exercício</th>
+                                    <th class="p-3 w-20 text-center">Séries</th>
+                                    <th class="p-3 w-24 text-center">Reps</th>
+                                    <th class="p-3 hidden md:table-cell">Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                `;
+                tabContentContainer.appendChild(contentDiv);
+
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    document.querySelectorAll('#tab-content > div').forEach(div => div.classList.add('hidden'));
+                    document.getElementById(key).classList.remove('hidden');
+                });
+            });
+
+            if (Object.keys(workoutData.workouts).length > 0) {
+                document.querySelector('.tab-button').click();
+            }
+        });
+    </script>
+
+</body>
+</html>
