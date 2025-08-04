@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Protocolo de Treino - Ana Gabriela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* Slate 50 */
+            color: #0F172A; /* Slate 900 */
+        }
+        .main-title {
+            color: #2563EB; /* Blue 600 */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-left: 4px solid #F59E0B; /* Amber 500 */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .icon {
+            color: #F59E0B; /* Amber 500 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .workout-table th {
+            background-color: #F1F5F9; /* Slate 100 */
+            color: #B45309; /* Amber 700 */
+        }
+        .workout-table tr:nth-child(even) {
+            background-color: #F8FAFC; /* Slate 50 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center my-12">
+            <!-- LOGO AJUSTADA -->
+            <div class="flex justify-center mb-6 -mt-8">
+                <img src="https://i.imgur.com/CyMYe3b.png" alt="Logotipo" class="h-32">
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black main-title mb-2">PROTOCOLO DE TREINO</h1>
+            <p class="text-xl md:text-2xl font-bold text-slate-900">Ana Gabriela Dos Santos Oliveira</p>
+            <p class="text-lg text-slate-800 mt-2">Objetivo: Adaptação Morfológica Hipertrofia</p>
+        </header>
+
+        <!-- SEÇÃO DE BOAS-VINDAS ADICIONADA -->
+        <section id="welcome-message" class="my-16 text-center">
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md border-t-4 border-blue-600">
+                <p class="text-lg text-slate-700">
+                    Olá, Ana Gabriela! Este protocolo foi criado especialmente para você, com base nas suas necessidades, vontades e objetivos. Estou animado para que alcance o resultado desejado! Fico à disposição em caso de dúvidas, queixas ou feedbacks.
+                </p>
+            </div>
+        </section>
+
+        <section id="core-principles" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Boas condutas a serem seguidas</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-slate-700">Para que seus resultados sejam maximizados é necessario que alguns pilares sejam seguidos.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon h-48 flex justify-center items-center mb-3">
+                        <span class="text-5xl">🎯</span>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Padrão de Movimento</h3>
+                    <p class="text-slate-700">A execução deve ser padronizada, mantenha o padrão orientado e progrida em cima dele.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon h-48 flex justify-center items-center mb-3">
+                        <span class="text-5xl">📈</span>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Progressão de Carga</h3>
+                    <p class="text-slate-700">Busque progredir a cada sessão! Alocando ao menos 1kg a mais ou adicionando repetições mas se mantendo dentro da margem prescrita.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon h-48 flex justify-center items-center mb-3">
+                        <img src="https://i.imgur.com/I14lOl1.png" alt="Ilustração de Unidade Motora" class="h-full object-contain">
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Empregue Esforço</h3>
+                    <p class="text-slate-700">O esforço funciona como uma chave de acesso pras Unidades Motoras com mais potencial hipertrófico, é preciso que suas ultimas reps que fiquem lentas involuntariamente</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="card p-6 rounded-lg text-center">
+                    <div class="icon h-48 flex justify-center items-center mb-3">
+                        <span class="text-5xl">⏱️</span>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Descanso Inteligente</h3>
+                    <p class="text-slate-700">No minimo 2 minutos de descanso entre as séries. O descanso adequado permite a extrair o melhor das series subsequentes, evitando um grande declineo na performance.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="weekly-split" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Divisão de Treino: L/U 2x</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-slate-700">Sua divisão terá uma frequencia de 2 vezes na semana por grupamento muscular, que é evidenciado pela literatura como producente para hipertrofia.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 w-full max-w-5xl mx-auto">
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-amber-600">Segunda</p>
+                    <p class="font-semibold text-slate-800">Lower 1</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-amber-600">Terça</p>
+                    <p class="font-semibold text-slate-800">Upper 1</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-red-100 border border-red-200 w-full md:w-auto">
+                    <p class="font-bold text-lg text-red-600">Quarta</p>
+                    <p class="font-semibold text-slate-800">Off</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-amber-600">Quinta</p>
+                    <p class="font-semibold text-slate-800">Lower 2</p>
+                </div>
+                <div class="h-1 w-8 bg-gray-300 md:h-auto md:w-12 md:bg-transparent md:border-t-4 md:border-gray-300"></div>
+                <div class="text-center p-4 rounded-lg bg-white shadow-sm w-full md:w-auto">
+                    <p class="font-bold text-lg text-amber-600">Sexta</p>
+                    <p class="font-semibold text-slate-800">Upper 2</p>
+                </div>
+            </div>
+            <div class="text-center mt-6">
+                <p class="font-bold text-lg text-red-700">Sábado & Domingo: <span class="font-semibold text-slate-800">Descanso Total</span></p>
+            </div>
+        </section>
+
+        <section id="muscle-focus" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Foco Muscular do Programa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-4 text-center text-slate-900">Distribuição de Volume Semanal</h3>
+                    <div class="chart-container">
+                        <canvas id="muscleFocusChart"></canvas>
+                    </div>
+                </div>
+                <div id="muscle-focus-text" class="text-slate-700 text-lg">
+                     <p>O gráfico de radar ilustra a distribuição de séries semanais por grupo muscular. Pontos mais distantes do centro indicam maior volume de treino.</p>
+                     <p class="mt-2"><span class="font-bold text-blue-600">O Volume de treino</span> é uma variavel extremamente importante a se controlar, a Literatura é consistente em dizer que há uma relação dose-reposta entre volume de treino e hipertrofia mais isso não é infinito, é necessario avaliar sua recuperação entre as sessões através da progressão de carga.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workout-details" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12 text-slate-900">Seu Treino Detalhado</h2>
+            <div id="workout-list" class="w-full max-w-5xl mx-auto">
+                <!-- Conteúdo do treino será inserido aqui pelo JS -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- RODAPÉ ADICIONADO -->
+    <footer class="bg-slate-100 border-t border-slate-200 mt-16">
+        <div class="container mx-auto py-6 px-4 flex flex-col sm:flex-row justify-center items-center gap-6">
+            <a href="https://www.instagram.com/Jplimxz" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-amber-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                <span class="font-semibold">@Jplimxz</span>
+            </a>
+            <a href="https://wa.me/5511975484900" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-amber-500 transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6"><path d="M16.75 13.96c.25.13.42.2.55.34.13.14.2.28.25.42a.83.83 0 0 1-.02.72c-.1.24-.28.45-.5.63s-.5.33-.8.44c-.3.1-.63.15-.98.12s-.7-.1-1.04-.24a6.87 6.87 0 0 1-2.7-1.6c-.57-.4-1.1-1-1.55-1.62-.47-.6-.85-1.28-1.1-2.02s-.4-1.5-.4-2.28c0-.2.01-.4.04-.6s.07-.4.1-.58a2.55 2.55 0 0 1 .9-1.2c.2-.17.43-.3.68-.36.25-.07.5-.1.75-.1.23 0 .45.02.65.05.2.03.4.1.6.2l.3.15c.2.1.38.2.52.34s.28.3.4.48c.1.2.18.4.22.6.04.2.05.4.02.6-.03.2-.1.4-.2.57s-.2.33-.34.48l-.24.28c-.1.12-.18.23-.25.33s-.12.2-.15.3c-.03.1-.05.2-.05.3s0 .2.03.3c.03.1.07.2.13.3.2.27.43.53.7.77.25.25.53.48.83.7.1.07.2.13.3.2.1.05.2.1.3.1.1 0 .2-.02.3-.05s.2-.07.3-.12l.28-.24c.14-.14.3-.24.48-.32a1.7 1.7 0 0 1 1.18.1c.2.1.4.2.57.34.17.14.32.3.44.45Z M12 2a10 10 0 0 0-10 10c0 1.7.43 3.38 1.2 4.84l-1.2 4.16 4.28-1.18A10 10 0 0 0 12 22a10 10 0 1 0 0-20Z"></path></svg>
+                <span class="font-semibold">11 97548-4900</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workoutData = {
+                workouts: {
+                    lower1: {
+                        title: 'Lower 1',
+                        description: 'Foco no desenvolvimento de posteriores e quadríceps.',
+                        exercises: [
+                            { name: 'Mesa Flexora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Agachamento Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Extensão de Quadril na Polia', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Adutora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    upper1: {
+                        title: 'Upper 1',
+                        description: 'Foco em costas, ombros e braços.',
+                        exercises: [
+                            { name: 'Remada Serrote com Halteres', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Desenvolvimento com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Puxada Triângulo', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Tríceps na Barra V', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Rosca Alternada com Halter', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Abdominal na Máquina', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    lower2: {
+                        title: 'Lower 2',
+                        description: 'Segundo dia com ênfase em glúteos e posteriores.',
+                        exercises: [
+                            { name: 'Afundo no Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Stiff com Barra', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Levantamento Pélvico na Máquina', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Abdução de Quadril na Polia', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    },
+                    upper2: {
+                        title: 'Upper 2',
+                        description: 'Segundo dia com foco em volume para costas e ombros.',
+                        exercises: [
+                            { name: 'Remada com Peito Apoiado', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Elevação Lateral com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Puxada com Pegada Anatômica', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Tríceps na Paralela (Máquina)', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' },
+                            { name: 'Rosca na Barra (Polia)', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2).' }
+                        ]
+                    }
+                },
+                muscleFocusData: {
+                    'Posteriores/Glúteos': 11,
+                    'Quadríceps': 10,
+                    'Costas': 6,
+                    'Panturrilhas': 6,
+                    'Ombros': 4,
+                    'Tríceps': 4,
+                    'Bíceps': 4,
+                    'Abdômen': 3
+                }
+            };
+
+            const ctx = document.getElementById('muscleFocusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(workoutData.muscleFocusData),
+                    datasets: [{
+                        label: 'Séries Semanais',
+                        data: Object.values(workoutData.muscleFocusData),
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                        borderColor: '#F59E0B',
+                        pointBackgroundColor: '#F59E0B',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#F59E0B'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(15, 23, 42, 0.4)' },
+                            grid: { color: 'rgba(15, 23, 42, 0.4)' },
+                            pointLabels: { color: '#0F172A', font: { size: 14, weight: 'bold' } },
+                            ticks: {
+                                color: '#F8FAFC',
+                                backdropColor: 'rgba(15, 23, 42, 0.7)',
+                                backdropPadding: 4,
+                                borderRadius: 4,
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 12
+                        }
+                    }
+                }
+            });
+
+            const workoutListContainer = document.getElementById('workout-list');
+            workoutListContainer.innerHTML = ''; 
+
+            Object.keys(workoutData.workouts).forEach(key => {
+                const workout = workoutData.workouts[key];
+                const workoutContainer = document.createElement('div');
+                workoutContainer.className = 'bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-8';
+
+                let tableRows = '';
+                workout.exercises.forEach(ex => {
+                    tableRows += `
+                        <tr class="border-b border-slate-200">
+                            <td class="p-3 font-semibold text-slate-800">${ex.name}</td>
+                            <td class="p-3 text-center text-slate-700">${ex.sets}</td>
+                            <td class="p-3 text-center text-slate-700">${ex.reps}</td>
+                            <td class="p-3 text-slate-700 hidden md:table-cell">${ex.obs}</td>
+                        </tr>
+                    `;
+                });
+
+                workoutContainer.innerHTML = `
+                    <h3 class="font-bold text-2xl text-slate-900 mb-2">${workout.title}</h3>
+                    <p class="text-slate-700 mb-6">${workout.description}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left workout-table rounded-lg overflow-hidden">
+                            <thead>
+                                <tr>
+                                    <th class="p-3">Exercício</th>
+                                    <th class="p-3 w-20 text-center">Séries</th>
+                                    <th class="p-3 w-24 text-center">Reps</th>
+                                    <th class="p-3 hidden md:table-cell">Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                `;
+                workoutListContainer.appendChild(workoutContainer);
+            });
+        });
+    </script>
+
+</body>
+</html>
