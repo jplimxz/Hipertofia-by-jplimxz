@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Treino Personalizado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Remove as setas dos campos de número */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .details-marker::before {
+            content: '▶';
+            margin-right: 12px;
+            font-size: 0.9em;
+            transition: transform 0.2s ease-in-out;
+            display: inline-block;
+        }
+        details[open] > summary .details-marker::before {
+            transform: rotate(90deg);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        .chart-wrapper {
+            position: relative;
+            overflow-x: auto;
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-3xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600">Plano de Treino</h1>
+            <p class="text-gray-600 mt-2">Clique em "Iniciar Sessão" para começar seu treino do dia.</p>
+        </header>
+
+        <div id="workouts-container" class="space-y-6">
+            <!-- Os treinos serão renderizados aqui pelo JavaScript -->
+        </div>
+
+        <footer class="text-center mt-12 text-sm text-gray-500">
+            <p>&copy; 2024 - Planilha de Treino Personalizada.</p>
+        </footer>
+    </div>
+
+    <!-- Modal de Confirmação e Download -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal-overlay">
+        <div id="modal-content" class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
+            <!-- O conteúdo do modal será inserido aqui dinamicamente -->
+        </div>
+    </div>
+
+
+    <script>
+        // --- ESTRUTURA DE DADOS INICIAL COM O TREINO DA ALUNA E HISTÓRICO FICTÍCIO ---
+        const PRELOADED_WORKOUT = [
+            {
+                day: "Lower 1",
+                focus: "Foco no desenvolvimento de posteriores e quadríceps.",
+                exercises: [
+                    { id: 1, name: 'Mesa Flexora', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 20, reps: 8 }, { weight: 20, reps: 7 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 25, reps: 6 }, { weight: 25, reps: 6 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 25, reps: 8 }, { weight: 25, reps: 7 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 30, reps: 6 }, { weight: 30, reps: 6 }] }
+                    ]},
+                    { id: 2, name: 'Agachamento Smith', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 40, reps: 10 }, { weight: 40, reps: 9 }, { weight: 40, reps: 8 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 45, reps: 8 }, { weight: 45, reps: 8 }, { weight: 45, reps: 7 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 50, reps: 8 }, { weight: 50, reps: 8 }, { weight: 50, reps: 6 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 50, reps: 9 }, { weight: 50, reps: 8 }, { weight: 50, reps: 8 }] }
+                    ]},
+                    { id: 3, name: 'Cadeira Extensora', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 30, reps: 10 }, { weight: 30, reps: 10 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 35, reps: 9 }, { weight: 35, reps: 8 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 35, reps: 10 }, { weight: 35, reps: 9 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 40, reps: 8 }, { weight: 40, reps: 8 }] }
+                    ]},
+                    { id: 4, name: 'Extensão de Quadril na Polia', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 10, reps: 10 }, { weight: 10, reps: 10 }, { weight: 10, reps: 9 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 12.5, reps: 9 }, { weight: 12.5, reps: 8 }, { weight: 12.5, reps: 8 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 15, reps: 8 }, { weight: 15, reps: 8 }, { weight: 15, reps: 7 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 15, reps: 10 }, { weight: 15, reps: 9 }, { weight: 15, reps: 9 }] }
+                    ]},
+                    { id: 5, name: 'Cadeira Adutora', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 40, reps: 8 }, { weight: 40, reps: 8 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 45, reps: 7 }, { weight: 45, reps: 6 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 50, reps: 6 }, { weight: 50, reps: 6 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 50, reps: 7 }, { weight: 50, reps: 7 }] }
+                    ]},
+                    { id: 6, name: 'Panturrilha Leg Press Horizontal', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [
+                        { sessionId: 1721001600000, date: '2025-07-14', sets: [{ weight: 60, reps: 10 }, { weight: 60, reps: 10 }, { weight: 60, reps: 10 }] },
+                        { sessionId: 1721606400000, date: '2025-07-21', sets: [{ weight: 70, reps: 9 }, { weight: 70, reps: 9 }, { weight: 70, reps: 8 }] },
+                        { sessionId: 1722211200000, date: '2025-07-28', sets: [{ weight: 75, reps: 8 }, { weight: 75, reps: 8 }, { weight: 75, reps: 8 }] },
+                        { sessionId: 1722816000000, date: '2025-08-04', sets: [{ weight: 80, reps: 8 }, { weight: 80, reps: 8 }, { weight: 80, reps: 7 }] }
+                    ]}
+                ]
+            },
+            {
+                day: "Upper 1",
+                focus: "Foco em costas, ombros e braços.",
+                exercises: [
+                    { id: 7, name: 'Remada Serrote com Halteres', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [] },
+                    { id: 8, name: 'Desenvolvimento com Halteres', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 9, name: 'Puxada Triângulo', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 10, name: 'Tríceps na Barra V', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 11, name: 'Rosca Alternada com Halter', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 12, name: 'Abdominal na Máquina', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [] }
+                ]
+            },
+            {
+                day: "Lower 2",
+                focus: "Segundo dia com ênfase em glúteos e posteriores.",
+                exercises: [
+                    { id: 13, name: 'Afundo no Smith', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 14, name: 'Stiff com Barra', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [] },
+                    { id: 15, name: 'Elevação Pélvica na Máquina', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [] },
+                    { id: 16, name: 'Abdução de Quadril na Polia', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 17, name: 'Cadeira Extensora', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [] },
+                    { id: 18, name: 'Panturrilha Leg Press Horizontal', sets: 3, reps: '8-10', obs: 'RIR 1-2', sessions: [] }
+                ]
+            },
+            {
+                day: "Upper 2",
+                focus: "Segundo dia com foco em volume para costas e ombros.",
+                exercises: [
+                    { id: 19, name: 'Remada com Peito Apoiado', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 20, name: 'Elevação Lateral com Halteres', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 21, name: 'Puxada com Pegada Anatômica', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 22, name: 'Tríceps na Paralela (Máquina)', sets: 2, reps: '8-10', obs: 'RIR 1-2', sessions: [] },
+                    { id: 23, name: 'Rosca na Barra (Polia)', sets: 2, reps: '6-8', obs: 'RIR 1-2', sessions: [] }
+                ]
+            }
+        ];
+
+        // --- VARIÁVEIS GLOBAIS ---
+        const workoutsContainer = document.getElementById('workouts-container');
+        const modal = document.getElementById('confirmation-modal');
+        const modalContent = document.getElementById('modal-content');
+        let workoutData = [];
+        let charts = {};
+        let activeSession = { day: null, startTime: null, intervalId: null, duration: '00:00:00' };
+
+        // --- FUNÇÕES DE UTILIDADE ---
+        const getTodayDateString = () => new Date().toISOString().split('T')[0];
+        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const formatFullDate = (date) => date.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // --- LÓGICA DE DADOS (localStorage) ---
+        function loadData() {
+            const savedData = localStorage.getItem('workoutDataPersonalizedV16'); // Versão incrementada
+            workoutData = savedData ? JSON.parse(savedData) : PRELOADED_WORKOUT;
+            
+            const savedSessionDay = localStorage.getItem('activeSessionDay');
+            const savedSessionStart = localStorage.getItem('sessionStartTime');
+            if (savedSessionDay && savedSessionStart) {
+                activeSession.day = savedSessionDay;
+                activeSession.startTime = new Date(parseInt(savedSessionStart));
+                startTimer();
+            }
+            renderWorkouts();
+        }
+
+        function saveData() {
+            localStorage.setItem('workoutDataPersonalizedV16', JSON.stringify(workoutData));
+        }
+
+        // --- RENDERIZAÇÃO E UI ---
+        function renderWorkouts() {
+            const openDetails = new Set();
+            document.querySelectorAll('details[open]').forEach(d => openDetails.add(d.dataset.day));
+            
+            workoutsContainer.innerHTML = '';
+            workoutData.forEach(workoutDay => {
+                const isSessionActiveForThisDay = activeSession.day === workoutDay.day;
+                const details = document.createElement('details');
+                details.className = 'bg-white rounded-xl shadow-md overflow-hidden';
+                details.dataset.day = workoutDay.day;
+                details.open = openDetails.has(workoutDay.day) || isSessionActiveForThisDay || openDetails.size === 0;
+
+                const summary = document.createElement('summary');
+                summary.className = 'p-5 cursor-pointer text-xl font-bold text-gray-800 details-marker';
+                summary.innerHTML = `${workoutDay.day} <span class="text-base font-normal text-gray-500 ml-2">${workoutDay.focus}</span>`;
+                
+                const contentContainer = document.createElement('div');
+                contentContainer.className = 'border-t border-gray-200';
+
+                const sessionControlBar = document.createElement('div');
+                sessionControlBar.id = `session-control-${workoutDay.day}`;
+                sessionControlBar.className = 'p-4 bg-gray-50';
+                
+                if (isSessionActiveForThisDay) {
+                    sessionControlBar.innerHTML = `
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div>
+                                <p class="text-sm font-semibold text-indigo-600">${formatFullDate(new Date())}</p>
+                                <p id="timer-${workoutDay.day}" class="text-2xl font-bold text-gray-800">00:00:00</p>
+                            </div>
+                            <button onclick="showEndSessionConfirmation('${workoutDay.day}')" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors">
+                                Encerrar Sessão
+                            </button>
+                        </div>`;
+                } else {
+                    sessionControlBar.innerHTML = `<button onclick="startSession('${workoutDay.day}')" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors">Iniciar Sessão de Treino</button>`;
+                }
+                
+                const exercisesContainer = document.createElement('div');
+                exercisesContainer.className = 'p-5 space-y-4';
+                if (!isSessionActiveForThisDay) {
+                    exercisesContainer.classList.add('opacity-50', 'pointer-events-none');
+                }
+                workoutDay.exercises.forEach(exercise => {
+                    exercisesContainer.appendChild(createExerciseCard(exercise, workoutDay.day));
+                });
+                
+                details.appendChild(summary);
+                contentContainer.appendChild(sessionControlBar);
+                contentContainer.appendChild(exercisesContainer);
+                details.appendChild(contentContainer);
+                workoutsContainer.appendChild(details);
+            });
+
+            workoutData.forEach(day => day.exercises.forEach(ex => renderMiniChart(ex)));
+        }
+
+        function getHistoryHTML(exercise) {
+            const historySessions = [...exercise.sessions].reverse();
+            return historySessions.length > 0 ? historySessions.map(session => {
+                const validSets = session.sets.filter(s => s && s.weight && s.reps);
+                if (validSets.length === 0) return '';
+                const heaviestSet = validSets.reduce((heaviest, current) => (current.weight > heaviest.weight) ? current : heaviest, { weight: 0, reps: 0 });
+                return `<li class="text-xs text-gray-600"><span class="font-semibold">${formatDate(session.date)}:</span> Carga Máx: ${heaviestSet.weight} kg x ${heaviestSet.reps} reps</li>`;
+            }).join('') : '<li class="text-xs text-gray-400">Sem histórico.</li>';
+        }
+
+        function createExerciseCard(exercise, workoutDayName) {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-50 p-4 rounded-lg border border-gray-200';
+            card.id = `exercise-card-${exercise.id}`;
+
+            const isSessionActiveForThisExercise = activeSession.day === workoutDayName;
+            
+            // Procura pela sessão ATIVA para preencher os campos
+            let currentSessionData = null;
+            if (isSessionActiveForThisExercise) {
+                const currentSessionId = activeSession.startTime.getTime();
+                currentSessionData = exercise.sessions.find(s => s.sessionId === currentSessionId);
+            }
+
+            let setsHTML = '';
+            for (let i = 0; i < exercise.sets; i++) {
+                const setData = currentSessionData?.sets[i];
+                const isSaved = setData && setData.weight && setData.reps;
+                
+                setsHTML += `
+                    <div class="flex items-center gap-2">
+                        <span class="w-16 text-sm font-medium text-gray-600">Série ${i + 1}:</span>
+                        <input type="number" placeholder="kg" value="${setData?.weight || ''}" class="w-full p-2 border rounded-md text-sm" id="weight-input-${exercise.id}-set-${i}">
+                        <input type="number" placeholder="reps" value="${setData?.reps || ''}" class="w-full p-2 border rounded-md text-sm" id="reps-input-${exercise.id}-set-${i}">
+                        <button id="save-btn-${exercise.id}-set-${i}" onclick="saveSet(${exercise.id}, ${i})" class="p-2 rounded-md ${isSaved ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'} transition-colors">
+                            ${isSaved ? 
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' :
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>'
+                            }
+                        </button>
+                    </div>`;
+            }
+
+            const historyHTML = getHistoryHTML(exercise);
+
+            card.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-semibold text-indigo-700">${exercise.name}</h4>
+                        <p class="text-sm text-gray-500 mb-3">${exercise.sets} séries de ${exercise.reps} reps (${exercise.obs})</p>
+                        <div class="space-y-2">${setsHTML}</div>
+                    </div>
+                    <div>
+                        <div class="chart-wrapper h-32 mb-2 custom-scrollbar"><div class="chart-inner h-full"><canvas id="chart-${exercise.id}"></canvas></div></div>
+                        <h5 class="text-sm font-semibold mb-1">Histórico:</h5>
+                        <ul id="history-list-${exercise.id}" class="space-y-1 max-h-24 overflow-y-auto custom-scrollbar pr-2">${historyHTML}</ul>
+                    </div>
+                </div>`;
+            return card;
+        }
+        
+        // --- LÓGICA DA SESSÃO, CRONÔMETRO E MODAL ---
+        function startSession(dayName) {
+            if (activeSession.day) {
+                alert(`Termine a sessão de ${activeSession.day} antes de iniciar uma nova.`);
+                return;
+            }
+            activeSession.day = dayName;
+            activeSession.startTime = new Date();
+            localStorage.setItem('activeSessionDay', dayName);
+            localStorage.setItem('sessionStartTime', activeSession.startTime.getTime());
+            
+            startTimer();
+            renderWorkouts();
+        }
+
+        function showEndSessionConfirmation(dayName) {
+            const workoutDay = workoutData.find(day => day.day === dayName);
+            const currentSessionId = activeSession.startTime.getTime();
+            let summaryHTML = '';
+            let exercisesDone = 0;
+
+            workoutDay.exercises.forEach(ex => {
+                const currentSession = ex.sessions.find(s => s.sessionId === currentSessionId);
+                const validSets = currentSession?.sets.filter(s => s && s.weight && s.reps) || [];
+                if (validSets.length > 0) {
+                    exercisesDone++;
+                    summaryHTML += `<div class="mb-2"><p class="font-bold text-indigo-600">${ex.name}</p>`;
+                    validSets.forEach((set) => {
+                        const originalIndex = currentSession.sets.findIndex(s => s === set);
+                        summaryHTML += `<div class="flex justify-between pl-2 text-gray-600"><span>Série ${originalIndex + 1}:</span><span>${set.weight} kg x ${set.reps} reps</span></div>`;
+                    });
+                    summaryHTML += `</div>`;
+                }
+            });
+
+            let confirmationText = "";
+            if (exercisesDone === 0) {
+                summaryHTML = '<p class="text-center text-gray-500">Nenhum exercício registrado nesta sessão.</p>';
+                confirmationText = "Tem certeza que deseja encerrar a sessão sem nenhuma anotação?";
+            } else {
+                confirmationText = "Tem certeza que deseja encerrar e salvar a sessão?";
+            }
+
+            modalContent.innerHTML = `
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Resumo da Sessão</h2>
+                <div class="mb-6 text-sm space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">${summaryHTML}</div>
+                <p class="text-center font-semibold mb-6">${confirmationText}</p>
+                <div class="flex justify-end gap-4">
+                    <button onclick="closeModal()" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Cancelar</button>
+                    <button onclick="endSessionConfirmed('${dayName}')" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">Sim, Encerrar</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modalContent.innerHTML = '';
+        }
+
+        function endSessionConfirmed(dayName) {
+            const sessionIdToEnd = activeSession.startTime.getTime();
+            clearInterval(activeSession.intervalId);
+
+            modalContent.innerHTML = `
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mx-auto mb-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Sessão Encerrada!</h2>
+                    <p class="text-gray-600 mb-6">Seu treino foi salvo com sucesso.</p>
+                    <div class="flex flex-col gap-4">
+                        <button onclick="generateAndDownloadReport('${dayName}', ${sessionIdToEnd})" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                            Baixar Resumo do Treino
+                        </button>
+                        <button onclick="closeModalAndRefresh()" class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            activeSession = { day: null, startTime: null, intervalId: null, duration: '00:00:00' };
+            localStorage.removeItem('activeSessionDay');
+            localStorage.removeItem('sessionStartTime');
+        }
+        
+        function closeModalAndRefresh() {
+            closeModal();
+            renderWorkouts();
+        }
+
+        function startTimer() {
+            if (activeSession.intervalId) clearInterval(activeSession.intervalId);
+            activeSession.intervalId = setInterval(updateTimerDisplay, 1000);
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            if (!activeSession.startTime) return;
+            const timerEl = document.getElementById(`timer-${activeSession.day}`);
+            if (!timerEl) return;
+
+            const elapsed = Math.floor((new Date() - activeSession.startTime) / 1000);
+            const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const seconds = String(elapsed % 60).padStart(2, '0');
+            activeSession.duration = `${hours}:${minutes}:${seconds}`;
+            timerEl.textContent = activeSession.duration;
+        }
+
+        // --- MANIPULAÇÃO DE DADOS ---
+        function updateHistoryForExercise(exercise) {
+            const historyList = document.getElementById(`history-list-${exercise.id}`);
+            if (historyList) {
+                historyList.innerHTML = getHistoryHTML(exercise);
+            }
+        }
+
+        function saveSet(exerciseId, setIndex) {
+            const weightInput = document.getElementById(`weight-input-${exerciseId}-set-${setIndex}`);
+            const repsInput = document.getElementById(`reps-input-${exerciseId}-set-${setIndex}`);
+            
+            const weight = parseFloat(weightInput.value);
+            const reps = parseInt(repsInput.value);
+
+            if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+                alert("Por favor, insira valores válidos para carga e repetições.");
+                return;
+            }
+
+            const exercise = workoutData.flatMap(day => day.exercises).find(ex => ex.id === exerciseId);
+            if (!exercise || !activeSession.startTime) return;
+
+            const currentSessionId = activeSession.startTime.getTime();
+            let currentSession = exercise.sessions.find(s => s.sessionId === currentSessionId);
+
+            if (!currentSession) {
+                const todayDateStr = getTodayDateString();
+                currentSession = { 
+                    sessionId: currentSessionId, 
+                    date: todayDateStr, 
+                    sets: Array(exercise.sets).fill(null) 
+                };
+                exercise.sessions.push(currentSession);
+                exercise.sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+
+            currentSession.sets[setIndex] = { weight, reps };
+            saveData();
+
+            const saveButton = document.getElementById(`save-btn-${exerciseId}-set-${setIndex}`);
+            if (saveButton) {
+                saveButton.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-600');
+                saveButton.classList.add('bg-green-500', 'text-white');
+                saveButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
+            }
+            updateHistoryForExercise(exercise);
+            renderMiniChart(exercise);
+        }
+
+        // --- LÓGICA DO GRÁFICO ---
+        function renderMiniChart(exercise) {
+            const canvas = document.getElementById(`chart-${exercise.id}`);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const chartWrapper = canvas.closest('.chart-wrapper');
+            const chartInner = chartWrapper.querySelector('.chart-inner');
+            
+            const oldMessage = chartWrapper.querySelector('.chart-placeholder');
+            if(oldMessage) oldMessage.remove();
+
+            const validSessions = exercise.sessions.filter(s => s.sets.some(set => set && set.weight && set.reps));
+
+            if (validSessions.length < 2) {
+                chartInner.style.display = 'none';
+                if (!chartWrapper.querySelector('.chart-placeholder')) {
+                    chartWrapper.insertAdjacentHTML('afterbegin', `<div class="chart-placeholder h-full flex items-center justify-center text-xs text-center text-gray-500 p-4">O gráfico aparecerá após registrar treinos em <strong>2 dias diferentes</strong>.</div>`);
+                }
+                return;
+            }
+            chartInner.style.display = 'block';
+
+            const labels = validSessions.map(s => formatDate(s.date));
+            
+            const heaviestSets = validSessions.map(session => {
+                return session.sets
+                    .filter(set => set && set.weight && set.reps)
+                    .reduce((heaviest, current) => (current.weight > heaviest.weight) ? current : heaviest, { weight: 0, reps: 0 });
+            });
+
+            const maxWeightData = heaviestSets.map(set => set.weight);
+            const repsAtMaxWeight = heaviestSets.map(set => set.reps);
+
+            const newWidth = Math.max(250, validSessions.length * 50);
+            chartInner.style.width = `${newWidth}px`;
+
+            if (charts[exercise.id]) charts[exercise.id].destroy();
+
+            charts[exercise.id] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Carga Máxima (kg)',
+                        data: maxWeightData,
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'rgb(79, 70, 229)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            callbacks: { 
+                                title: () => null, 
+                                label: (context) => {
+                                    const weight = context.parsed.y;
+                                    const reps = repsAtMaxWeight[context.dataIndex];
+                                    return `Carga: ${weight} kg x ${reps} reps`;
+                                }
+                            } 
+                        }
+                    },
+                    scales: { 
+                        y: { beginAtZero: true, ticks: { font: { size: 10 } }, title: { display: true, text: 'Carga (kg)', font: { size: 10 } } }, 
+                        x: { ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // --- FUNÇÃO PARA GERAR E BAIXAR O RELATÓRIO ---
+        function generateAndDownloadReport(dayName, sessionId) {
+            const workoutDay = workoutData.find(day => day.day === dayName);
+            
+            let exercisesReportHTML = '';
+            let exercisesDataForScript = [];
+            let sessionDate = getTodayDateString();
+
+            workoutDay.exercises.forEach(ex => {
+                const sessionForReport = ex.sessions.find(s => s.sessionId === sessionId);
+                const validSets = sessionForReport?.sets.filter(s => s && s.weight && s.reps) || [];
+
+                if (validSets.length > 0) {
+                    sessionDate = sessionForReport.date;
+                    let setsSummary = '';
+                    validSets.forEach((set) => {
+                        const originalIndex = sessionForReport.sets.findIndex(s => s === set);
+                        setsSummary += `<li class="text-gray-600">Série ${originalIndex + 1}: ${set.weight} kg x ${set.reps} reps</li>`;
+                    });
+                    
+                    exercisesReportHTML += `
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold text-indigo-700 mb-3">${ex.name}</h3>
+                            <p class="font-semibold text-gray-700 mb-2">Resumo da sessão de hoje:</p>
+                            <ul class="list-disc list-inside mb-4">${setsSummary}</ul>
+                            <p class="font-semibold text-gray-700 mb-2">Histórico de Progressão:</p>
+                            <div class="chart-wrapper h-64 mb-2 custom-scrollbar"><div class="chart-inner h-full"><canvas id="chart-report-${ex.id}"></canvas></div></div>
+                        </div>
+                    `;
+                    exercisesDataForScript.push(ex);
+                }
+            });
+
+            if(exercisesDataForScript.length === 0) {
+                alert("Nenhum exercício foi registrado para gerar um relatório.");
+                return;
+            }
+
+            const reportHTML = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Resumo do Treino - ${workoutDay.day} - ${formatDate(sessionDate)}</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; }
+                        .chart-wrapper { position: relative; overflow-x: auto; }
+                        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+                        .custom-scrollbar::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 10px; }
+                        .custom-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; }
+                        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+                    <\/style>
+                </head>
+                <body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+                    <div class="max-w-4xl mx-auto">
+                        <header class="text-center mb-8 p-6 bg-white rounded-lg shadow-md">
+                            <h1 class="text-3xl font-bold text-indigo-600">Resumo do Treino</h1>
+                            <h2 class="text-2xl font-semibold text-gray-700 mt-1">${workoutDay.day}</h2>
+                            <p class="text-gray-500 mt-2">Data: ${formatFullDate(new Date(sessionDate + 'T00:00:00'))}</p>
+                            <p class="text-gray-500">Duração da Sessão: ${activeSession.duration}</p>
+                        </header>
+                        <main class="space-y-6">${exercisesReportHTML}</main>
+                    </div>
+                    <script>
+                        const allExercisesData = ${JSON.stringify(exercisesDataForScript)};
+                        
+                        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+                        function renderChartInReport(exercise) {
+                            const canvas = document.getElementById('chart-report-' + exercise.id);
+                            if (!canvas) return;
+                            const ctx = canvas.getContext('2d');
+                            const chartWrapper = canvas.closest('.chart-wrapper');
+                            const chartInner = chartWrapper.querySelector('.chart-inner');
+
+                            const validSessions = exercise.sessions.filter(s => s.sets.some(set => set && set.weight && set.reps));
+                            if (validSessions.length === 0) return;
+
+                            const labels = validSessions.map(s => formatDate(s.date));
+                            const heaviestSets = validSessions.map(session => {
+                                return session.sets
+                                    .filter(set => set && set.weight && set.reps)
+                                    .reduce((heaviest, current) => (current.weight > heaviest.weight) ? current : heaviest, { weight: 0, reps: 0 });
+                            });
+                            const maxWeightData = heaviestSets.map(set => set.weight);
+                            const repsAtMaxWeight = heaviestSets.map(set => set.reps);
+
+                            const newWidth = Math.max(300, validSessions.length * 60);
+                            chartInner.style.width = newWidth + 'px';
+
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Carga Máxima (kg)',
+                                        data: maxWeightData,
+                                        borderColor: 'rgb(79, 70, 229)',
+                                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                                        borderWidth: 2,
+                                        tension: 0.3,
+                                        fill: true,
+                                        pointBackgroundColor: 'rgb(79, 70, 229)'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true, position: 'top' },
+                                        tooltip: { 
+                                            callbacks: { 
+                                                label: (context) => 'Carga: ' + context.parsed.y + ' kg x ' + repsAtMaxWeight[context.dataIndex] + ' reps'
+                                            } 
+                                        }
+                                    },
+                                    scales: { 
+                                        y: { beginAtZero: true, title: { display: true, text: 'Carga (kg)' } }, 
+                                        x: {}
+                                    }
+                                }
+                            });
+                        }
+
+                        window.onload = () => {
+                            allExercisesData.forEach(renderChartInReport);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([reportHTML], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `resumo-treino-${dayName.replace(/\s+/g, '-')}-${sessionDate}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
