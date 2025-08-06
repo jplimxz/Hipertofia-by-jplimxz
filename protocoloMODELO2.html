@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Protocolo de Treino - Ana Gabriela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Importando as fontes Inter (para corpo) e Playfair Display (para títulos) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- CONFIGURAÇÕES GLOBAIS E DE DESIGN ELEGANTE --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* Slate 50 */
+            color: #1E293B; /* Slate 800 - Cor principal do texto */
+        }
+        
+        /* Aplicando a fonte de serifa elegante para os títulos */
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .main-title {
+            color: #0F172A; /* Slate 900 */
+            text-shadow: none; /* Remove a sombra para um look mais limpo */
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: #1E293B; /* Slate 800 */
+            border-bottom: 1px solid #CBD5E1; /* Slate 300 */
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0; /* Borda fina e sutil */
+            border-top: 4px solid #B45309; /* Bronze/Dourado Queimado - Cor de destaque */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); /* Sombra muito mais suave */
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.07);
+        }
+
+        .icon {
+            color: #B45309; /* Bronze/Dourado Queimado */
+        }
+        
+        .video-link {
+            color: #D97706; /* Âmbar vibrante para destaque */
+            font-weight: 600;
+        }
+        .video-link:hover {
+            color: #B45309; /* Tom mais escuro no hover */
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Estilo elegante para as tabelas */
+        .workout-table {
+             border-collapse: collapse;
+        }
+        .workout-table th {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            background-color: transparent;
+            color: #B45309; /* Bronze/Dourado Queimado */
+            border-bottom: 2px solid #B45309;
+            text-align: left;
+            padding: 0.75rem 1rem;
+        }
+        .workout-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #F1F5F9; /* Linha separadora horizontal muito sutil */
+        }
+        .workout-table tr:last-child td {
+            border-bottom: none; /* Remove a borda da última linha */
+        }
+        .workout-table tr:nth-child(even) {
+            background-color: transparent; /* Remove o fundo alternado para um visual mais limpo */
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO PARA PDF --- */
+        @media print {
+            body {
+                background-color: #FFFFFF;
+                color: #000000;
+            }
+            footer, .welcome-card-border {
+                display: none;
+            }
+            #core-principles,
+            #weekly-split,
+            #muscle-focus,
+            #workout-details {
+                page-break-before: always;
+            }
+            .workout-container {
+                page-break-before: always;
+            }
+            .card, .shadow-md, .shadow-lg {
+                box-shadow: none !important;
+                border: 1px solid #DDD !important;
+            }
+            .main-title, .section-title {
+                color: #000000;
+                text-shadow: none;
+            }
+        }
+
+        /* --- CONFIGURAÇÃO DA PÁGINA PARA IMPRESSÃO (CABEÇALHO/RODAPÉ) --- */
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Protocolo de Treino - Ana Gabriela | Página " counter(page) " de " counter(pages);
+                font-family: 'Inter', sans-serif;
+                font-size: 9pt;
+                color: #666;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center my-12">
+            <div class="flex justify-center mb-6 -mt-8">
+                <img src="https://i.imgur.com/CyMYe3b.png" alt="Logotipo" class="h-32">
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black main-title mb-2">PROTOCOLO DE TREINO</h1>
+            <p class="text-xl md:text-2xl font-bold text-slate-800">Ana Gabriela Dos Santos Oliveira</p>
+            <p class="text-lg text-slate-600 mt-2">Objetivo: Adaptação Morfológica Hipertrofia</p>
+        </header>
+
+        <section id="welcome-message" class="my-16 text-center">
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md border-t-4 border-slate-800 welcome-card-border">
+                <p class="text-lg text-slate-700">
+                    Olá, Ana Gabriela! Este protocolo foi criado especialmente para você, com base nas suas necessidades, vontades e objetivos. Estou animado para que alcance o resultado desejado! Fico à disposição em caso de dúvidas, queixas ou feedbacks.
+                </p>
+            </div>
+        </section>
+
+        <section id="core-principles" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12"><span class="section-title">Boas Condutas</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Card 1: Ícone SVG substituído -->
+                <div class="card p-6 text-center">
+                    <div class="icon h-16 w-16 mx-auto flex justify-center items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Padrão de Movimento</h3>
+                    <p class="text-slate-600 text-sm">A execução deve ser padronizada, mantenha o padrão orientado e progrida em cima dele.</p>
+                </div>
+                <!-- Card 2: Ícone SVG -->
+                <div class="card p-6 text-center">
+                    <div class="icon h-16 w-16 mx-auto flex justify-center items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Sobrecarga Progressiva</h3>
+                    <p class="text-slate-600 text-sm">Busque progredir a cada sessão, seja com mais carga ou mais repetições dentro da margem prescrita.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="card p-6 text-center">
+                    <div class="icon h-16 flex justify-center items-center mb-4 mx-auto">
+                        <img src="https://i.imgur.com/I14lOl1.png" alt="Ilustração de Unidade Motora" class="h-full object-contain">
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Empregue Esforço</h3>
+                    <p class="text-slate-600 text-sm">O esforço recruta as Unidades Motoras de maior potencial hipertrófico. Suas últimas repetições devem ser lentas.</p>
+                </div>
+                <!-- Card 4: Ícone SVG -->
+                <div class="card p-6 text-center">
+                    <div class="icon h-16 w-16 mx-auto flex justify-center items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">Descanso Inteligente</h3>
+                    <p class="text-slate-600 text-sm">No mínimo 2 minutos de descanso entre as séries para garantir a melhor performance nas séries seguintes.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="weekly-split" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12"><span class="section-title">Divisão Semanal: L/U 2x</span></h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-slate-600">Sua divisão terá uma frequência de 2x na semana por grupamento muscular, o que é altamente produtivo para hipertrofia segundo a literatura científica.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 w-full max-w-5xl mx-auto">
+                <div class="text-center p-4 rounded-lg bg-white border border-slate-200 w-full md:w-auto">
+                    <p class="font-bold text-lg" style="color: #B45309;">Segunda</p>
+                    <p class="font-semibold text-slate-800">Lower 1</p>
+                </div>
+                <div class="h-px w-8 bg-slate-300 md:h-auto md:w-12 md:bg-transparent md:border-t-2 md:border-slate-300 md:border-dashed"></div>
+                <div class="text-center p-4 rounded-lg bg-white border border-slate-200 w-full md:w-auto">
+                    <p class="font-bold text-lg" style="color: #B45309;">Terça</p>
+                    <p class="font-semibold text-slate-800">Upper 1</p>
+                </div>
+                <div class="h-px w-8 bg-slate-300 md:h-auto md:w-12 md:bg-transparent md:border-t-2 md:border-slate-300 md:border-dashed"></div>
+                <div class="text-center p-4 rounded-lg bg-red-50 border border-red-200 w-full md:w-auto">
+                    <p class="font-bold text-lg text-red-600">Quarta</p>
+                    <p class="font-semibold text-slate-800">Off</p>
+                </div>
+                <div class="h-px w-8 bg-slate-300 md:h-auto md:w-12 md:bg-transparent md:border-t-2 md:border-slate-300 md:border-dashed"></div>
+                <div class="text-center p-4 rounded-lg bg-white border border-slate-200 w-full md:w-auto">
+                    <p class="font-bold text-lg" style="color: #B45309;">Quinta</p>
+                    <p class="font-semibold text-slate-800">Lower 2</p>
+                </div>
+                <div class="h-px w-8 bg-slate-300 md:h-auto md:w-12 md:bg-transparent md:border-t-2 md:border-slate-300 md:border-dashed"></div>
+                <div class="text-center p-4 rounded-lg bg-white border border-slate-200 w-full md:w-auto">
+                    <p class="font-bold text-lg" style="color: #B45309;">Sexta</p>
+                    <p class="font-semibold text-slate-800">Upper 2</p>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <p class="font-bold text-lg text-red-700">Sábado & Domingo: <span class="font-semibold text-slate-800">Descanso Total</span></p>
+            </div>
+        </section>
+
+        <section id="muscle-focus" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12"><span class="section-title">Volume semanal</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="p-6 rounded-lg border border-slate-200 bg-white">
+                    <h3 class="font-bold text-xl mb-4 text-center text-slate-900">Distribuição de Volume Semanal</h3>
+                    <div class="chart-container">
+                        <canvas id="muscleFocusChart"></canvas>
+                    </div>
+                </div>
+                <div id="muscle-focus-text" class="text-slate-600 text-base">
+                     <p>O gráfico de radar ilustra a distribuição de séries semanais por grupo muscular. Pontos mais distantes do centro indicam maior volume de treino.</p>
+                     <p class="mt-4"><span class="font-bold text-slate-800">O Volume de treino</span> é uma variável extremamente importante a se controlar. A literatura é consistente em apontar uma relação dose-resposta entre volume e hipertrofia, mas isso não é infinito. É necessário avaliar sua recuperação entre as sessões através da progressão de carga.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workout-details" class="my-16">
+            <h2 class="text-3xl font-bold text-center mb-12"><span class="section-title">Seu Treino Detalhado</span></h2>
+            <div id="workout-list" class="w-full max-w-5xl mx-auto space-y-12">
+                <!-- Conteúdo do treino será inserido aqui pelo JS -->
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="bg-slate-100 border-t border-slate-200 mt-16">
+        <div class="container mx-auto py-6 px-4 flex flex-col sm:flex-row justify-center items-center gap-6">
+            <a href="https://www.instagram.com/Jplimxz" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-amber-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                <span class="font-semibold">@Jplimxz</span>
+            </a>
+            <a href="https://wa.me/5511975484900" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-amber-800 transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6"><path d="M16.75 13.96c.25.13.42.2.55.34.13.14.2.28.25.42a.83.83 0 0 1-.02.72c-.1.24-.28.45-.5.63s-.5.33-.8.44c-.3.1-.63.15-.98.12s-.7-.1-1.04-.24a6.87 6.87 0 0 1-2.7-1.6c-.57-.4-1.1-1-1.55-1.62-.47-.6-.85-1.28-1.1-2.02s-.4-1.5-.4-2.28c0-.2.01-.4.04-.6s.07-.4.1-.58a2.55 2.55 0 0 1 .9-1.2c.2-.17.43-.3.68-.36.25-.07.5-.1.75-.1.23 0 .45.02.65.05.2.03.4.1.6.2l.3.15c.2.1.38.2.52.34s.28.3.4.48c.1.2.18.4.22.6.04.2.05.4.02.6-.03.2-.1.4-.2.57s-.2.33-.34.48l-.24.28c-.1.12-.18.23-.25.33s-.12.2-.15.3c-.03.1-.05.2-.05.3s0 .2.03.3c.03.1.07.2.13.3.2.27.43.53.7.77.25.25.53.48.83.7.1.07.2.13.3.2.1.05.2.1.3.1.1 0 .2-.02.3-.05s.2-.07.3-.12l.28-.24c.14-.14.3-.24.48-.32a1.7 1.7 0 0 1 1.18.1c.2.1.4.2.57.34.17.14.32.3.44.45Z M12 2a10 10 0 0 0-10 10c0 1.7.43 3.38 1.2 4.84l-1.2 4.16 4.28-1.18A10 10 0 0 0 12 22a10 10 0 1 0 0-20Z"></path></svg>
+                <span class="font-semibold">11 97548-4900</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workoutData = {
+                workouts: {
+                    lower1: {
+                        title: 'Lower 1',
+                        description: '', // Texto removido
+                        exercises: [
+                            { name: 'Mesa Flexora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/n5WDXD_mpVY?si=KmrjdX6sg_Y2nusj" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Agachamento Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/-eO_VydErV0?si=IxjsojyeLfAA5jOx" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/m0FOpMEgero?si=uM-gO_uNg4_4LdZB" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Extensão de Quadril na Polia', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/uhKCb3JMld4?si=f0EObn_vIahJv7hZ" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Cadeira Adutora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/TB4BwvHaK9o?si=FZ_iJkwkgia78Ift" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/ZSbr5uTZQ-I?si=Z7ofPw8FT2y1UkqU" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' }
+                        ]
+                    },
+                    upper1: {
+                        title: 'Upper 1',
+                        description: '', // Texto removido
+                        exercises: [
+                            { name: 'Remada Serrote com Halteres', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://www.youtube.com/watch?v=DMo3HJoawrU" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Desenvolvimento com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/HzIiNhHhhtA?si=qyh70kUHwzF03kl5" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Puxada Triângulo', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/ySLFHxmJ_Sc?si=aj67B8Fdhjf3d2_G" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Tríceps na Barra V', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/6Fzep104f0s?si=smEsPuCvwZCYHf51" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Rosca Alternada com Halter', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/ymOxKh5zgAQ?si=2BTxI2RaJArD4cQs" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Abdominal na Máquina', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/tLK5ZuIX1gU?si=IV5q3AD5LkQtedye" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' }
+                        ]
+                    },
+                    lower2: {
+                        title: 'Lower 2',
+                        description: '', // Texto removido
+                        exercises: [
+                            { name: 'Afundo no Smith', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/Q7oxL7h2OPg?si=8ssOAcDRDWnyrQC3" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Stiff com Barra', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/CN_7cz3P-1U?si=d8AAms--F_4DUhn5" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Elevação Pélvica na Máquina', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/ZSPmIyX9RZs?si=Fyk7xYNfHvxju0Da" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Abdução de Quadril na Polia', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://www.youtube.com/shorts/oZODxYQcf1g" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://www.youtube.com/watch?v=m0FOpMEgero" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Panturrilha Leg Press Horizontal', sets: '3', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtube.com/shorts/ZSbr5uTZQ-I?si=vCQlU0XeciiA6K9S" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' }
+                        ]
+                    },
+                    upper2: {
+                        title: 'Upper 2',
+                        description: '', // Texto removido
+                        exercises: [
+                            { name: 'Remada com Peito Apoiado', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/_FrrYQxA6kc?si=C1eIFmeSClATqQ1U" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Elevação Lateral com Halteres', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/OuG1smZTsQQ?si=AkzAQgB3y6veHSeW" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Puxada com Pegada Anatômica', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/EUIri47Epcg?si=pqW1kOkm3SBclR_L" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Tríceps na Paralela (Máquina)', sets: '2', reps: '8-10', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/OChuGyCSC7U?si=Z1exvKVMd0EgOfGs" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' },
+                            { name: 'Rosca na Barra (Polia)', sets: '2', reps: '6-8', obs: 'Manter 1-2 repetições na reserva (RIR 1-2). <a href="https://youtu.be/yuozln3CC94?si=5jVLWXrCaQkT2diy" target="_blank" class="video-link inline-flex items-center">Ver Vídeo <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>' }
+                        ]
+                    }
+                },
+                muscleFocusData: {
+                    'Posteriores/Glúteos': 11,
+                    'Quadríceps': 10,
+                    'Costas': 6,
+                    'Panturrilhas': 6,
+                    'Ombros': 4,
+                    'Tríceps': 4,
+                    'Bíceps': 4,
+                    'Abdômen': 3
+                }
+            };
+
+            const ctx = document.getElementById('muscleFocusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(workoutData.muscleFocusData),
+                    datasets: [{
+                        label: 'Séries Semanais',
+                        data: Object.values(workoutData.muscleFocusData),
+                        backgroundColor: 'rgba(217, 119, 6, 0.2)', /* Amarelo-Bronze com transparência */
+                        borderColor: '#D97706', /* Amarelo-Bronze sólido */
+                        pointBackgroundColor: '#D97706',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#D97706'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false } // Desabilitar tooltip já que os números estão visíveis
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(30, 41, 59, 0.2)' },
+                            grid: { color: 'rgba(30, 41, 59, 0.2)' },
+                            pointLabels: { color: '#0F172A', font: { family: "'Inter', sans-serif", size: 12, weight: '600' } },
+                            ticks: {
+                                display: true, // --- MUDANÇA PRINCIPAL AQUI ---
+                                color: '#475569',
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                backdropPadding: 4,
+                                borderRadius: 4,
+                                font: {
+                                    size: 10
+                                },
+                                stepSize: 2 
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 12
+                        }
+                    }
+                }
+            });
+
+            const workoutListContainer = document.getElementById('workout-list');
+            workoutListContainer.innerHTML = ''; 
+
+            Object.keys(workoutData.workouts).forEach(key => {
+                const workout = workoutData.workouts[key];
+                const workoutContainer = document.createElement('div');
+                workoutContainer.className = 'bg-white p-4 sm:p-6 rounded-lg border border-slate-200 workout-container';
+
+                let tableRows = '';
+                workout.exercises.forEach(ex => {
+                    tableRows += `
+                        <tr>
+                            <td class="font-semibold text-slate-800">${ex.name}</td>
+                            <td class="text-center text-slate-600">${ex.sets}</td>
+                            <td class="text-center text-slate-600">${ex.reps}</td>
+                            <td class="text-slate-600 text-sm hidden md:table-cell">${ex.obs}</td>
+                        </tr>
+                    `;
+                });
+
+                workoutContainer.innerHTML = `
+                    <div class="mb-6">
+                        <h3 class="font-bold text-2xl text-slate-900">${workout.title}</h3>
+                        <p class="text-slate-500 mt-1">${workout.description}</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left workout-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-2/5">Exercício</th>
+                                    <th class="text-center">Séries</th>
+                                    <th class="text-center">Reps</th>
+                                    <th class="hidden md:table-cell">Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                `;
+                workoutListContainer.appendChild(workoutContainer);
+            });
+        });
+    </script>
+
+</body>
+</html>
