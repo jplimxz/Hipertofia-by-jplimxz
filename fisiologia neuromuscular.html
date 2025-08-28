@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo de Fisiologia Neuromuscular</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo para usar a fonte Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <!-- Cabeçalho Principal -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Fisiologia Neuromuscular</h1>
+        </header>
+
+        <main class="space-y-8">
+            <!-- Seção: Potencial de Ação e Unidades Motoras -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-blue-700">Potencial de Ação e Unidades Motoras</h2>
+                <p class="mb-4">O <strong>Potencial de Ação</strong> é uma alteração elétrica na membrana de uma célula excitável, como um neurônio ou fibra muscular, que ocorre quando canais iônicos dependentes de voltagem se abrem.</p>
+                <p class="mb-4">Uma <strong>Unidade Motora (UM)</strong> é o conjunto formado por um motoneurônio alfa e todas as fibras musculares que ele inerva. A força muscular é determinada por dois fatores principais:</p>
+                <ol class="list-decimal list-inside space-y-2 mb-4 pl-4">
+                    <li><strong>Recrutamento de UMs:</strong> O número de unidades motoras ativadas.</li>
+                    <li><strong>Taxa de Disparo:</strong> A frequência com que o sistema nervoso envia os potenciais de ação.</li>
+                </ol>
+                <p class="bg-blue-50 p-3 rounded-md">Quanto maior o número de UMs recrutadas e maior a frequência de disparos, maior será a força gerada.</p>
+
+                <h3 class="text-xl font-semibold mt-6 mb-3">Diversidade das Unidades Motoras</h3>
+                <p class="mb-4">As UMs não são todas iguais; elas possuem características neurais distintas, sendo as principais diferenças:</p>
+                <ul class="list-disc list-inside space-y-2 pl-4">
+                    <li><strong>Densidade de canais iônicos:</strong> A quantidade de canais de Sódio (Na+) e Potássio (K+) na membrana.</li>
+                    <li><strong>Morfologia do axônio:</strong> O diâmetro do axônio do motoneurônio.</li>
+                    <li><strong>Input sináptico:</strong> A frequência dos disparos de potencial de ação que a UM recebe.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mt-6 mb-3">Tipos de Unidades Motoras</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-center">
+                    <div class="border p-4 rounded-lg bg-gray-50">
+                        <h4 class="font-bold text-lg">Baixo Limiar (Tipo I)</h4>
+                        <ul class="mt-2 text-left list-disc list-inside text-sm">
+                            <li><strong>Frequência:</strong> 10-20 Hz</li>
+                            <li><strong>Canais de Na+:</strong> Baixa densidade</li>
+                            <li><strong>Repouso:</strong> -85 mV</li>
+                        </ul>
+                    </div>
+                    <div class="border p-4 rounded-lg bg-gray-50">
+                        <h4 class="font-bold text-lg">Limiar Intermediário (Tipo IIa)</h4>
+                        <ul class="mt-2 text-left list-disc list-inside text-sm">
+                            <li><strong>Frequência:</strong> 40-90 Hz</li>
+                            <li><strong>Canais de Na+:</strong> Média densidade</li>
+                            <li><strong>Repouso:</strong> -92.7 mV</li>
+                        </ul>
+                    </div>
+                    <div class="border p-4 rounded-lg bg-gray-50">
+                        <h4 class="font-bold text-lg">Alto Limiar (Tipo IIx)</h4>
+                        <ul class="mt-2 text-left list-disc list-inside text-sm">
+                            <li><strong>Frequência:</strong> 200 Hz</li>
+                            <li><strong>Canais de Na+:</strong> Alta densidade</li>
+                            <li><strong>Repouso:</strong> -94.6 mV</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold mt-6 mb-3">Limiar Excitatório (LE) e Pico do Potencial de Ação (PA)</h3>
+                <p class="mb-4">Para que uma célula seja excitada, é preciso vencer uma certa diferença de potencial (ddp):</p>
+                <ul class="list-disc list-inside space-y-2 pl-4">
+                    <li><strong>Neurônio:</strong> Precisa vencer uma ddp de <strong>15 mV</strong> para atingir o LE.</li>
+                    <li><strong>Fibra Tipo I:</strong> LE de <strong>30.3 mV</strong> e Pico de PA de <strong>115.3 mV</strong>.</li>
+                    <li><strong>Fibra Tipo IIa:</strong> LE de <strong>37.7 mV</strong> e Pico de PA de <strong>122.3 mV</strong>.</li>
+                    <li><strong>Fibra Tipo IIx:</strong> LE de <strong>39.6 mV</strong> e Pico de PA de <strong>122.6 mV</strong>.</li>
+                </ul>
+                <p class="mt-4 bg-yellow-50 p-3 rounded-md">A ordem de dificuldade de recrutamento é: <strong>Tipo I > Tipo IIa > Tipo IIx</strong>.</p>
+            </section>
+
+            <!-- Seção: Potencial de Repouso e Despolarização -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-green-700">Potencial de Repouso e Despolarização da Membrana</h2>
+                <p class="mb-4">Em estado de repouso, a membrana celular é eletricamente negativa em seu interior. Os íons mais importantes para a excitabilidade são o <strong>Sódio (Na+)</strong> e o <strong>Potássio (K+)</strong>.</p>
+                <ol class="list-decimal list-inside space-y-2 pl-4">
+                    <li><strong>Repouso:</strong> A membrana de um neurônio está em aproximadamente <strong>-70 mV</strong>.</li>
+                    <li><strong>Estímulo:</strong> Um estímulo despolarizante (ex: acetilcolina) abre os canais de Na+.</li>
+                    <li><strong>Despolarização:</strong> Ocorre um rápido influxo de Na+, atingindo o limiar de <strong>-55 mV</strong> e continuando até o pico de <strong>+35 mV</strong>.</li>
+                    <li><strong>Repolarização:</strong> No pico, os canais de Na+ se fecham e os de K+ se abrem.</li>
+                    <li><strong>Retorno ao Repouso:</strong> Ocorre um efluxo de K+, restabelecendo o potencial negativo da membrana.</li>
+                </ol>
+            </section>
+
+            <!-- Seção: Acoplamento Excitação-Contração -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-purple-700">Acoplamento Excitação-Contração (AEC)</h2>
+                <p class="mb-4">O tecido muscular é um tecido excitável, e sua contração é iniciada por um potencial de ação através do processo de Acoplamento Excitação-Contração.</p>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Etapas do AEC:</h3>
+                <ol class="list-decimal list-inside space-y-2 pl-4">
+                    <li>O potencial de ação se propaga pela membrana da fibra muscular (sarcolema).</li>
+                    <li>O potencial de ação viaja para o interior da fibra através dos <strong>Túbulos T</strong>.</li>
+                    <li>A despolarização provoca a liberação de íons <strong>Cálcio (Ca²+)</strong> pelo retículo sarcoplasmático.</li>
+                    <li>O Cálcio se liga ao complexo <strong>troponina-tropomiosina</strong>, liberando os sítios de ligação na <strong>actina</strong>.</li>
+                    <li>A cabeça da <strong>miosina</strong> (com ATP hidrolisado) liga-se à actina, ocorre o <strong>"Power Stroke"</strong> e o sarcômero encurta, resultando na <strong>contração muscular</strong>.</li>
+                </ol>
+            </section>
+
+            <!-- Seção: Princípio do Tamanho de Henneman -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-red-700">Princípio do Tamanho de Henneman</h2>
+                <p class="mb-4">Elwood Henneman descreveu que as unidades motoras são recrutadas em uma ordem específica, do menor para o maior.</p>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Relação com a Lei de Ohm:</h3>
+                <p class="mb-4">A velocidade de propagação do PA está relacionada ao diâmetro do axônio (resistência elétrica é inversamente proporcional à área).</p>
+                <ul class="list-disc list-inside space-y-2 pl-4">
+                    <li><strong>Axônios de menor diâmetro (Tipo I):</strong> Maior resistência interna.</li>
+                    <li><strong>Axônios de maior diâmetro (Tipo IIa e IIx):</strong> Menor resistência, propagação mais rápida.</li>
+                </ul>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Ordem de Recrutamento:</h3>
+                <ol class="list-decimal list-inside space-y-2 pl-4">
+                    <li><strong>UMs de Baixo Limiar (Tipo I):</strong> Axônios menores, potencial de repouso menos negativo. Exigem menos "esforço" para serem recrutadas.</li>
+                    <li><strong>UMs de Alto Limiar (Tipo IIa e IIx):</strong> Axônios maiores, potencial de repouso mais negativo. Exigem mais "esforço" para serem ativadas.</li>
+                </ol>
+                <p class="mt-4 bg-red-50 p-3 rounded-md">Basicamente, o nível de esforço empregado funciona como uma chave: o corpo recruta as UMs em ordem crescente de tamanho e dificuldade. Quando as UMs de alto limiar são ativadas, as de baixo limiar já foram recrutadas.</p>
+            </section>
+        </main>
+
+    </div>
+
+</body>
+</html>
