@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diário de Corrida</title>
+    <!-- Tailwind CSS para um design moderno e limpo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo para a fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+    
+    <!-- Cartão principal com fundo branco -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 sm:p-8 space-y-8">
+        
+        <!-- Cabeçalho -->
+        <header>
+            <h1 class="text-3xl font-bold text-gray-800 text-center">Velocidade por Quilômetro</h1>
+        </header>
+
+        <!-- Divisor -->
+        <hr/>
+
+        <!-- Seção de Informações da Participante -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-6">Informações da Participante</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Campo Participante -->
+                <div>
+                    <label for="participante" class="block text-sm font-medium text-gray-600 mb-2">Participante</label>
+                    <input type="text" id="participante" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <!-- Campo Data -->
+                <div>
+                    <label for="data" class="block text-sm font-medium text-gray-600 mb-2">Data</label>
+                    <input type="text" id="data" placeholder="    /    /" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <!-- Campo Fase do Ciclo -->
+                <div class="md:col-span-2">
+                    <label for="ciclo" class="block text-sm font-medium text-gray-600 mb-2">Fase do Ciclo Menstrual</label>
+                    <input type="text" id="ciclo" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+            </div>
+        </section>
+
+        <!-- Divisor -->
+        <hr/>
+
+        <!-- Seção de Tempos por Distância -->
+        <section>
+            <div class="space-y-4">
+                <!-- Linha do Cabeçalho da Tabela -->
+                 <div class="hidden md:grid md:grid-cols-2 gap-4 font-semibold text-gray-600 px-3">
+                    <div>Distância</div>
+                    <div>Km/h</div>
+                </div>
+                <!-- Campos para cada quilômetro -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" data-km="1">
+                    <label class="font-bold text-lg text-blue-600">1km</label>
+                    <input type="text" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" data-km="2">
+                    <label class="font-bold text-lg text-blue-600">2km</label>
+                    <input type="text" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" data-km="3">
+                    <label class="font-bold text-lg text-blue-600">3km</label>
+                    <input type="text" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" data-km="4">
+                    <label class="font-bold text-lg text-blue-600">4km</label>
+                    <input type="text" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" data-km="5">
+                    <label class="font-bold text-lg text-blue-600">5km</label>
+                    <input type="text" class="w-full md:w-48 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>
+
+
+
+
+
+
