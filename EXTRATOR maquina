@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator de Equipamentos DMX</title>
+    
+    <!-- PDF-Lib para processamento do PDF (Necessário para a lógica funcionar) -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- Ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-blue: #93c5fd;
+            --bg-blue-light: #eff6ff;
+            --bg-blue-hover: #dbeafe;
+            --error-bg: #fee2e2;
+            --error-border: #ef4444;
+            --error-text: #b91c1c;
+            --success-bg: #f0fdf4;
+            --success-border: #86efac;
+            --success-text: #15803d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-main);
+            margin: 0 0 0.5rem 0;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .upload-section {
+            margin-top: 1.5rem;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--border-blue);
+            background-color: var(--bg-blue-light);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: block;
+        }
+
+        .upload-box:hover {
+            background-color: var(--bg-blue-hover);
+        }
+
+        .upload-box i {
+            font-size: 2.5rem;
+            color: #3b82f6;
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-box .title {
+            font-weight: bold;
+            color: var(--text-main);
+            display: block;
+        }
+
+        .upload-box .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Loading */
+        .loading-section {
+            padding: 2rem 0;
+            display: none;
+        }
+        .loading-section.active {
+            display: block;
+        }
+        .fa-spinner {
+            color: #2563eb;
+            font-size: 2.25rem;
+        }
+
+        /* Download Section */
+        .download-section {
+            display: none;
+            margin-top: 1.5rem;
+        }
+        .download-section.active {
+            display: block;
+        }
+
+        .success-msg {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--success-text);
+        }
+
+        .btn-download {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: bold;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            text-decoration: underline;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+        .btn-reset:hover {
+            color: #4b5563;
+        }
+
+        /* Error */
+        .error-message {
+            display: none;
+            background-color: var(--error-bg);
+            border-left: 4px solid var(--error-border);
+            color: var(--error-text);
+            padding: 1rem;
+            border-radius: 0.25rem;
+            text-align: left;
+            margin-top: 1rem;
+        }
+        .error-message.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Cabeçalho -->
+        <div class="header-icon">
+            <i class="fas fa-dumbbell"></i>
+        </div>
+        <h1>Extrator DMX</h1>
+        <p>Separa automaticamente a sessão de "Equipamentos Disponíveis" (Páginas 13 a 25).</p>
+
+        <!-- Área de Upload -->
+        
+        <!-- Passo 1: Selecionar -->
+        <div id="upload-section" class="upload-section">
+            <label class="upload-box">
+                <i class="fas fa-file-upload"></i>
+                <span class="title">Clique para selecionar o PDF</span>
+                <span class="subtitle">Formulário Completo DMX</span>
+                <input type="file" id="pdfInput" accept=".pdf" style="display: none;" onchange="processFile()">
+            </label>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading-section" class="loading-section">
+            <i class="fas fa-circle-notch fa-spin fa-spinner"></i>
+            <p style="margin-top: 1rem; font-weight: 600;">Processando páginas...</p>
+        </div>
+
+        <!-- Passo 2: Download -->
+        <div id="download-section" class="download-section">
+            <div class="success-msg">
+                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem; font-weight: bold;">
+                    <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                    Arquivo Pronto!
+                </div>
+                <div id="file-info" style="font-size: 0.85rem; opacity: 0.9;"></div>
+            </div>
+
+            <a id="downloadLink" href="#" class="btn-download">
+                <i class="fas fa-download"></i>
+                <span>BAIXAR ARQUIVO CORTADO</span>
+            </a>
+
+            <button onclick="resetApp()" class="btn-reset">
+                Fazer outro arquivo
+            </button>
+        </div>
+
+        <!-- Mensagem de Erro -->
+        <div id="error-message" class="error-message">
+            <div style="font-weight: bold; margin-bottom: 0.25rem;">Erro</div>
+            <div id="error-text">Algo deu errado.</div>
+        </div>
+
+        <div class="footer">
+            DMX Performance & Fit Tools
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO DAS PÁGINAS AQUI
+        // PDF começa na página 0 na programação.
+        // O usuário vê página 13, então índice é 12.
+        // O usuário vê página 25, então índice é 24.
+        const START_PAGE_INDEX = 12; // Página 13
+        const END_PAGE_INDEX = 24;   // Página 25
+
+        async function processFile() {
+            const input = document.getElementById('pdfInput');
+            const file = input.files[0];
+            
+            if (!file) return;
+
+            // UI Changes
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('loading-section').classList.add('active');
+            document.getElementById('error-message').classList.remove('active');
+
+            try {
+                // Ler o arquivo como ArrayBuffer
+                const arrayBuffer = await file.arrayBuffer();
+
+                // Carregar o PDF usando pdf-lib
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                
+                // Criar um novo documento PDF
+                const newPdf = await PDFLib.PDFDocument.create();
+
+                // Verificar se o PDF tem páginas suficientes
+                const totalPages = pdfDoc.getPageCount();
+                if (totalPages < END_PAGE_INDEX) {
+                    throw new Error(`O PDF enviado tem apenas ${totalPages} páginas. Precisa ter pelo menos 25.`);
+                }
+
+                // Criar array de índices para copiar
+                const pageIndices = [];
+                for (let i = START_PAGE_INDEX; i <= END_PAGE_INDEX; i++) {
+                    pageIndices.push(i);
+                }
+
+                // Copiar as páginas
+                const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
+
+                // Adicionar as páginas copiadas ao novo documento
+                copiedPages.forEach((page) => {
+                    newPdf.addPage(page);
+                });
+
+                // Salvar o novo PDF
+                const pdfBytes = await newPdf.save();
+
+                // Criar o Blob para download
+                const blob = new Blob([pdfBytes], { type: "application/pdf" });
+                const url = URL.createObjectURL(blob);
+                
+                // Configurar botão de download
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = url;
+                downloadLink.download = "DMX_Equipamentos_Disponiveis.pdf";
+
+                // Atualizar texto informativo
+                document.getElementById('file-info').textContent = `Extraído de: ${file.name}`;
+
+                // Mostrar seção de download
+                document.getElementById('loading-section').classList.remove('active');
+                document.getElementById('download-section').classList.add('active');
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading-section').classList.remove('active');
+                document.getElementById('error-message').classList.add('active');
+                document.getElementById('error-text').textContent = error.message;
+                
+                setTimeout(resetApp, 4000);
+            }
+        }
+
+        function resetApp() {
+            document.getElementById('pdfInput').value = "";
+            document.getElementById('download-section').classList.remove('active');
+            document.getElementById('error-message').classList.remove('active');
+            document.getElementById('upload-section').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
