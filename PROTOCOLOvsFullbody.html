@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Protocolo de Treino - Vitor Santana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CONFIGURAÇÕES GLOBAIS --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; 
+            color: #1E293B; 
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .main-title {
+            color: #0F172A; 
+            text-shadow: none;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: #1E293B; 
+            border-bottom: 1px solid #E9D5FF; /* Purple 200 */
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #F3E8FF; /* Purple 100 */
+            border-top: 4px solid #7e22ce; /* Purple 700 */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        
+        .icon {
+            color: #7e22ce; /* Purple 700 */
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        .workout-table {
+             border-collapse: collapse;
+        }
+        .workout-table th {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            background-color: transparent;
+            color: #7e22ce; /* Purple 700 */
+            border-bottom: 2px solid #7e22ce;
+            text-align: left;
+            padding: 0.75rem 1rem;
+        }
+        .workout-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        /* --- PAGINAÇÃO PARA PDF --- */
+        @media screen {
+            .pdf-page {
+                margin-bottom: 40px;
+                padding-bottom: 40px;
+                border-bottom: 2px dashed #E9D5FF;
+            }
+        }
+
+        @media print {
+            body {
+                background-color: #FFFFFF;
+                color: #000000;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .pdf-page {
+                page-break-after: always;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                height: auto;
+            }
+            .pdf-page:last-child {
+                page-break-after: auto;
+            }
+            header {
+                margin-top: 0 !important;
+                padding-top: 20px !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #E2E8F0 !important;
+                page-break-inside: avoid;
+            }
+            .workout-container {
+                page-break-inside: avoid;
+                margin-top: 20px;
+            }
+            footer {
+                display: block !important;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                background: white !important;
+            }
+            h2, h3, .chart-container, table {
+                page-break-inside: avoid;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- PÁGINA 1: CAPA E CONDUTAS -->
+        <div class="pdf-page">
+            <header class="text-center my-12">
+                <div class="flex justify-center mb-6 -mt-8">
+                    <img src="https://i.imgur.com/CyMYe3b.png" alt="Logotipo" class="h-32" onerror="this.src='https://via.placeholder.com/150?text=LOGO'">
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black main-title mb-2 uppercase tracking-tighter">PROTOCOLO DE TREINO</h1>
+                <p class="text-xl md:text-2xl font-bold text-purple-900">Vitor Santana</p>
+                <p class="text-lg text-slate-600 mt-2">Objetivo: Adaptação Morfológica Hipertrofia</p>
+            </header>
+
+            <section id="welcome-message" class="my-10 text-center">
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md border-t-4 border-purple-800">
+                    <p class="text-lg text-slate-700 leading-relaxed">
+                        Eai Vitor! O Protocolo de treino em questão foi criado com as informações e dados coletados tanto na nossa reunião via meet quanto no formulário de anamnese. Agradeço a confiança e fico à disposição para qualquer dúvida, queixas ou feedbacks.
+                    </p>
+                </div>
+            </section>
+
+            <section id="core-principles" class="my-10">
+                <h2 class="text-3xl font-bold text-center mb-8"><span class="section-title">Boas Condutas</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6 text-center">
+                        <h3 class="font-bold text-xl mb-2 text-purple-900">Padrão de Movimento</h3>
+                        <p class="text-slate-600 text-sm">A execução deve ser padronizada, mantenha o padrão orientado e progrida em cima dele.</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <h3 class="font-bold text-xl mb-2 text-purple-900">Sobrecarga Progressiva</h3>
+                        <p class="text-slate-600 text-sm">Busque progredir a cada sessão, seja com mais carga ou mais repetições dentro da margem prescrita.</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <h3 class="font-bold text-xl mb-2 text-purple-900">Empregue Esforço</h3>
+                        <p class="text-slate-600 text-sm">O esforço é a chave. As últimas reps devem ficar lentas involuntariamente.</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <h3 class="font-bold text-xl mb-2 text-purple-900">Descanso Inteligente</h3>
+                        <p class="text-slate-600 text-sm">Descanse no mínimo 1'30" entre cada série válida do treino.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PÁGINA 2: PLANEJAMENTO -->
+        <div class="pdf-page">
+            <section id="weekly-split" class="my-12">
+                <h2 class="text-3xl font-bold text-center mb-8"><span class="section-title">Divisão Semanal</span></h2>
+                <div class="flex flex-wrap justify-center gap-4 w-full max-w-5xl mx-auto">
+                    <!-- Segunda: Fullbody -->
+                    <div class="text-center p-4 rounded-lg bg-white border border-purple-100 w-32 shadow-sm">
+                        <p class="font-bold text-purple-700">Seg</p>
+                        <p class="font-semibold text-slate-800">Fullbody</p>
+                    </div>
+                    <!-- Terça: Cardio + Abd -->
+                    <div class="text-center p-4 rounded-lg bg-red-50 border border-red-200 w-32 shadow-sm">
+                        <p class="font-bold text-red-600">Ter</p>
+                        <p class="font-semibold text-red-900 text-sm">Cardio + Abd</p>
+                    </div>
+                    <!-- Quarta: Fullbody -->
+                    <div class="text-center p-4 rounded-lg bg-white border border-purple-100 w-32 shadow-sm">
+                        <p class="font-bold text-purple-700">Qua</p>
+                        <p class="font-semibold text-slate-800">Fullbody</p>
+                    </div>
+                    <!-- Quinta: Cardio + Abd -->
+                    <div class="text-center p-4 rounded-lg bg-red-50 border border-red-200 w-32 shadow-sm">
+                        <p class="font-bold text-red-600">Qui</p>
+                        <p class="font-semibold text-red-900 text-sm">Cardio + Abd</p>
+                    </div>
+                    <!-- Sexta: Fullbody -->
+                    <div class="text-center p-4 rounded-lg bg-white border border-purple-100 w-32 shadow-sm">
+                        <p class="font-bold text-purple-700">Sex</p>
+                        <p class="font-semibold text-slate-800">Fullbody</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="muscle-focus" class="my-12">
+                <h2 class="text-3xl font-bold text-center mb-8"><span class="section-title">Volume Semanal</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="p-6 rounded-lg border border-purple-100 bg-white">
+                        <div class="chart-container">
+                            <canvas id="muscleFocusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="text-slate-600 text-sm">
+                         <p>O gráfico ilustra a distribuição de séries semanais. O volume atual apresenta um foco maior em Costas, Peito e Quadríceps.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PÁGINAS DE TREINO -->
+        <div id="workout-pages"></div>
+
+        <!-- NOTA FINAL E EXTRAS -->
+        <div class="pdf-page">
+            <section class="my-12 space-y-8">
+                <!-- Margem de Reps -->
+                <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md border-l-4 border-purple-600">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Margem de Reps</h3>
+                    <p class="text-slate-700 leading-relaxed">
+                        A margem de reps é flexível para o desfecho hipertrófico. Foque em atingir a intensidade proposta e progredir cargas/repetições dentro da faixa sugerida.
+                    </p>
+                </div>
+
+                <!-- Cardio e Passos -->
+                <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md border-l-4 border-purple-600">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Cardio e Passos</h3>
+                    <p class="text-slate-700 leading-relaxed">
+                        <strong>Meta de 8.000 passos diários:</strong> Monitorados via smartwatch ou celular. O movimento não-exercício (NEAT) é fundamental para a saúde metabólica.
+                    </p>
+                </div>
+            </section>
+
+            <footer class="bg-slate-50 border-t border-slate-200 py-8 px-4 text-center">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-8">
+                    <div class="flex items-center gap-2 text-slate-600">
+                        <span class="font-bold">Instagram:</span> @Jplimxz
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-600">
+                        <span class="font-bold">WhatsApp:</span> 11 97548-4900
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-6 uppercase tracking-widest">Protocolo de Treino Especializado • Vitor Santana</p>
+            </footer>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workoutData = {
+                workouts: [
+                    {
+                        title: 'Fullbody 1 (Segunda-feira)',
+                        exercises: [
+                            { name: 'Fly', sets: '1', reps: '6-8', obs: 'Myo reps 15" entre blocos' },
+                            { name: 'Puxada pronada', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Remada apoiada articulada', sets: '3', reps: '7-9', obs: '-' },
+                            { name: 'Supino Declinado Life', sets: '3', reps: '7-9', obs: '-' },
+                            { name: 'Triceps frances com corda na polia', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Mesa flexora', sets: '1', reps: '7-9', obs: '-' },
+                            { name: 'Leg Press Horizontal Life Articulado', sets: '2', reps: '7-9', obs: '-' }
+                        ]
+                    },
+                    {
+                        title: 'Cardio + Abd (Terça-feira)',
+                        exercises: [
+                            { name: 'Abdominal máquina Life', sets: '3', reps: '10-15', obs: '-' },
+                            { name: 'Esteira', sets: '-', reps: "30'", obs: "Caminhada rápida" }
+                        ]
+                    },
+                    {
+                        title: 'Fullbody 2 (Quarta-feira)',
+                        exercises: [
+                            { name: 'RDL com barra', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Cadeira Extensora', sets: '2', reps: '6-8', obs: 'Myo reps 15" entre blocos' },
+                            { name: 'Pulldown corda', sets: '1', reps: '7-9', obs: '-' },
+                            { name: 'Remada apoiada supinada', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Desenvolvimento life fitness', sets: '1', reps: '6-8', obs: 'Myo reps 15" entre blocos' },
+                            { name: 'Rosca Banco Inclinado', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Panturrilha Leg press Horizontal', sets: '3', reps: '7-9', obs: '-' }
+                        ]
+                    },
+                    {
+                        title: 'Cardio + Abd 2 (Quinta-feira)',
+                        exercises: [
+                            { name: 'Abdominal máquina Life', sets: '3', reps: '10-15', obs: '-' },
+                            { name: 'Esteira', sets: '-', reps: "30'", obs: "Caminhada rápida" }
+                        ]
+                    },
+                    {
+                        title: 'Fullbody 3 (Sexta-feira)',
+                        exercises: [
+                            { name: 'Cadeira Flexora', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Leg Horizontal Life Articulado', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Supino Inclinado Smith', sets: '1', reps: '7-9', obs: '-' },
+                            { name: 'Elevação Lateral', sets: '2', reps: '6-8', obs: 'Myo reps 15" entre blocos' },
+                            { name: 'Triceps barra de costas pra polia', sets: '2', reps: '7-9', obs: '-' },
+                            { name: 'Rosca bayesian', sets: '1', reps: '7-9', obs: '-' },
+                            { name: 'Cross Over Polia alta', sets: '2', reps: '7-9', obs: '-' }
+                        ]
+                    }
+                ],
+                muscleFocusData: {
+                    'Peito': 10, 'Costas': 12, 'Ombros': 3, 'Quadríceps': 10, 'Posteriores/Glúteo': 9,
+                    'Bíceps': 5, 'Tríceps': 6, 'Panturrilhas': 4, 'Abdômen': 4, 'Antebraço': 3
+                }
+            };
+
+            // Gráfico com Tema Roxo
+            const ctx = document.getElementById('muscleFocusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(workoutData.muscleFocusData),
+                    datasets: [{
+                        label: 'Séries Semanais',
+                        data: Object.values(workoutData.muscleFocusData),
+                        backgroundColor: 'rgba(126, 34, 206, 0.2)', 
+                        borderColor: '#7e22ce', 
+                        pointBackgroundColor: '#7e22ce'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            suggestedMin: 0,
+                            suggestedMax: 15,
+                            ticks: { stepSize: 3 }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Geração de Tabelas
+            const workoutPages = document.getElementById('workout-pages');
+            workoutData.workouts.forEach(workout => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'pdf-page';
+                
+                const workoutContainer = document.createElement('div');
+                workoutContainer.className = 'bg-white p-6 rounded-lg border border-purple-100 mb-8 workout-container shadow-sm';
+
+                let tableRows = '';
+                workout.exercises.forEach(ex => {
+                    tableRows += `
+                        <tr>
+                            <td class="font-semibold text-slate-800">${ex.name}</td>
+                            <td class="text-center text-slate-600 font-bold">${ex.sets}</td>
+                            <td class="text-center text-slate-600">${ex.reps}</td>
+                            <td class="text-slate-500 text-xs italic hidden md:table-cell">${ex.obs}</td>
+                        </tr>
+                    `;
+                });
+
+                workoutContainer.innerHTML = `
+                    <h3 class="font-bold text-2xl text-slate-900 mb-4 border-l-4 border-purple-600 pl-3">${workout.title}</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left workout-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-2/5">Exercício</th>
+                                    <th class="text-center">Séries</th>
+                                    <th class="text-center">Reps</th>
+                                    <th class="hidden md:table-cell">Obs</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                `;
+                pageDiv.appendChild(workoutContainer);
+                workoutPages.appendChild(pageDiv);
+            });
+        });
+    </script>
+</body>
+</html>
