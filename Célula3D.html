@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Célula Humana 3D — Morfologia Celular Interativa</title>
+    <!-- Tailwind CSS para estilização responsiva e moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 para renderização 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Fonte Inter e JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 45%, #0f1f38 0%, #070d19 65%, #03060c 100%);
+            color: #f1f5f9;
+            user-select: none;
+        }
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* Barra de rolagem sutil para os painéis informativos */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.6);
+        }
+        /* Estilo customizado para o controle deslizante (range) */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(30, 41, 59, 0.9);
+            height: 6px;
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        /* Etiquetas flutuantes em 3D */
+        .label-3d {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+            z-index: 5;
+        }
+        .label-3d:hover {
+            transform: translate(-50%, -50%) scale(1.08);
+            z-index: 15;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal da Cena 3D -->
+    <div id="canvas-container"></div>
+
+    <!-- Camada de Rótulos 3D Projetados -->
+    <div id="labels-layer" class="fixed inset-0 pointer-events-none z-10 overflow-hidden"></div>
+
+    <!-- Tooltip de Hover Rápido -->
+    <div id="hover-tooltip" class="fixed pointer-events-none z-30 hidden px-3 py-1.5 rounded-xl bg-slate-900/90 border border-cyan-400/40 text-xs font-medium text-cyan-200 shadow-lg backdrop-blur-md">
+        <span id="hover-tooltip-text">Organela</span>
+    </div>
+
+    <!-- Cabeçalho Superior (Título + Nota Científica) -->
+    <header class="fixed top-3 left-3 right-3 md:top-4 md:left-4 md:right-auto md:max-w-md z-20 pointer-events-none">
+        <div class="pointer-events-auto rounded-2xl bg-slate-900/75 backdrop-blur-md border border-slate-700/60 p-3.5 md:p-4 shadow-2xl">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                    </span>
+                    <h1 class="text-base md:text-lg font-bold tracking-tight text-white">
+                        Célula Humana 3D <span class="text-cyan-400 font-normal text-xs md:text-sm">(Eucarionte)</span>
+                    </h1>
+                </div>
+                <button id="toggle-info-note" class="text-xs px-2 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/25 border border-cyan-500/30 transition" title="Nota Biológica">
+                    Nota
+                </button>
+            </div>
+            <p id="bio-note" class="mt-2 text-[11px] md:text-xs leading-relaxed text-slate-300">
+                <strong class="text-cyan-300">Esclarecimento biológico:</strong> Células humanas são <strong class="text-white">eucariontes</strong> (possuem núcleo individualizado e organelas membranosas), enquanto células <em>procariontes</em> (bactérias) não possuem núcleo. Explore o corte anatômico abaixo!
+            </p>
+        </div>
+    </header>
+
+    <!-- Painel Lateral Direito: Explorador de Organelas e Detalhes -->
+    <aside id="sidebar-panel" class="fixed bottom-20 left-3 right-3 md:bottom-auto md:top-4 md:right-4 md:left-auto md:w-80 lg:w-96 max-h-[46vh] md:max-h-[calc(100vh-6.5rem)] z-20 flex flex-col rounded-2xl bg-slate-900/80 backdrop-blur-md border border-slate-700/60 shadow-2xl transition-all duration-300">
+        <!-- Barra de Título do Painel -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700/60">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+                <h2 class="text-xs md:text-sm font-semibold uppercase tracking-wider text-slate-200">Estruturas Celulares</h2>
+            </div>
+            <button id="toggle-drawer-btn" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600/50 transition">
+                Minimizar
+            </button>
+        </div>
+
+        <!-- Conteúdo Rolável: Detalhe da Organela Selecionada + Lista -->
+        <div id="drawer-content" class="p-3.5 md:p-4 overflow-y-auto custom-scroll space-y-3">
+            <!-- Cartão de Detalhes da Estrutura Ativa -->
+            <div id="detail-card" class="rounded-xl bg-slate-800/80 border border-cyan-500/30 p-3.5 transition-all">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <span id="detail-category" class="inline-block text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 mb-1">
+                            Visão Geral
+                        </span>
+                        <h3 id="detail-title" class="text-sm md:text-base font-bold text-white">
+                            Célula Eucarionte Humana
+                        </h3>
+                    </div>
+                    <span id="detail-color-dot" class="w-4 h-4 rounded-full shrink-0 mt-1 border border-white/30 shadow" style="background-color: #22d3ee;"></span>
+                </div>
+                <p id="detail-desc" class="mt-2 text-xs text-slate-300 leading-relaxed">
+                    Clique em qualquer estrutura no modelo 3D ou na lista abaixo para aproximar a câmera e inspecionar sua morfologia e função fisiológica.
+                </p>
+                <div id="detail-meta" class="mt-2.5 pt-2.5 border-t border-slate-700/70 grid grid-cols-1 gap-1.5 text-[11px]">
+                    <div class="text-slate-400">
+                        <strong class="text-slate-200">Função principal:</strong> <span id="detail-function">Unidade morfofuncional fundamental dos tecidos humanos.</span>
+                    </div>
+                    <div class="text-slate-400">
+                        <strong class="text-slate-200">Composição:</strong> <span id="detail-composition">Bicamada fosfolipídica, citosol, organelas membranosas e núcleo com DNA.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista Interativa de Organelas -->
+            <div>
+                <p class="text-[11px] font-medium text-slate-400 mb-2 px-1">Selecione uma estrutura para focar:</p>
+                <div id="organelle-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-1.5">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Barra Inferior de Controles de Câmera e Simulação -->
+    <footer class="fixed bottom-3 left-3 right-3 z-20 flex justify-center pointer-events-none">
+        <div class="pointer-events-auto flex flex-wrap items-center justify-center gap-1.5 md:gap-2.5 px-3 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-slate-700/70 shadow-2xl max-w-full">
+            
+            <!-- Controles de Zoom e Câmera -->
+            <div class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+                <button id="btn-zoom-in" class="p-2 rounded-lg hover:bg-cyan-500/20 text-slate-200 hover:text-cyan-300 transition" title="Aproximar (Zoom In)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                </button>
+                <button id="btn-zoom-out" class="p-2 rounded-lg hover:bg-cyan-500/20 text-slate-200 hover:text-cyan-300 transition" title="Desaproximar (Zoom Out)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/></svg>
+                </button>
+                <button id="btn-reset-cam" class="px-2.5 py-1.5 rounded-lg hover:bg-cyan-500/20 text-xs font-medium text-slate-200 hover:text-cyan-300 transition" title="Resetar Câmera">
+                    Resetar
+                </button>
+            </div>
+
+            <!-- Controles de Visualização -->
+            <div class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+                <button id="btn-toggle-labels" class="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition">
+                    Rótulos: ON
+                </button>
+                <button id="btn-toggle-cutaway" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-700 text-slate-200 text-xs font-medium transition" title="Alternar entre corte anatômico e membrana fechada">
+                    Corte 3D
+                </button>
+                <button id="btn-toggle-anim" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-700 text-slate-200 text-xs font-medium transition" title="Pausar ou retomar dinâmica celular">
+                    Pausar
+                </button>
+            </div>
+
+            <!-- Controle Deslizante de Visão Explodida -->
+            <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/50">
+                <label for="explode-slider" class="text-xs font-medium text-slate-300 whitespace-nowrap">Explodir:</label>
+                <input id="explode-slider" type="range" min="0" max="100" value="0" class="w-20 md:w-24">
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Instrução Sutil de Gestos no Canto Inferior Esquerdo (Desktop) -->
+    <div class="hidden lg:flex fixed bottom-16 left-4 z-10 items-center gap-2 text-[11px] text-slate-400 bg-slate-900/50 px-3 py-1.5 rounded-xl border border-slate-800 pointer-events-none">
+        <span>Arraste para girar • Scroll/Pinça para zoom • Clique na organela para inspecionar</span>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * BASE DE DADOS MORFOLÓGICA E FUNCIONAL DAS ORGANELAS (PORTUGUÊS)
+         * ============================================================================
+         */
+        const ORGANELLE_DATA = {
+            membrana: {
+                id: 'membrana',
+                name: 'Membrana Plasmática (Camada Bilipídica)',
+                shortName: 'Camada Bilipídica',
+                category: 'Envoltório Celular',
+                color: '#22d3ee',
+                description: 'Barreira seletiva que delimita a célula. No corte anatômico (borda), observa-se a bicamada fosfolipídica: cabeças hidrofílicas voltadas para fora e para o citosol, e caudas hidrofóbicas no interior, atravessadas por proteínas canais.',
+                func: 'Permeabilidade seletiva, transporte de íons/nutrientes, reconhecimento celular e sinalização.',
+                composition: 'Fosfolipídios (bicamada), colesterol, glicolipídios e proteínas integrais/periféricas.',
+                cameraOffset: new THREE.Vector3(8.5, 4.2, 8.5),
+                targetPoint: new THREE.Vector3(4.8, 0.5, 4.8),
+                explodeDir: new THREE.Vector3(0, 0, 0)
+            },
+            nucleo: {
+                id: 'nucleo',
+                name: 'Núcleo Celular (Carioteca e Cromatina)',
+                shortName: 'Núcleo Celular',
+                category: 'Centro de Controle',
+                color: '#8b5cf6',
+                description: 'Maior organela da célula eucarionte. Revestido pela carioteca (membrana nuclear dupla perfurada por poros nucleares que regulam o trânsito de RNA e proteínas) e preenchido por nucleoplasma e cromatina (DNA).',
+                func: 'Armazenamento do material genético (DNA), replicação e controle da expressão gênica.',
+                composition: 'Envelope nuclear duplo, poros nucleares, lâmina nuclear, nucleoplasma e cromatina.',
+                cameraOffset: new THREE.Vector3(4.5, 3.0, 5.2),
+                targetPoint: new THREE.Vector3(0, 0.3, 0),
+                explodeDir: new THREE.Vector3(0, 0.6, 0)
+            },
+            nucleolo: {
+                id: 'nucleolo',
+                name: 'Nucléolo',
+                shortName: 'Nucléolo',
+                category: 'Estrutura Intranuclear',
+                color: '#ec4899',
+                description: 'Região densa, esférica e não delimitada por membrana localizada no interior do núcleo celular, formada por agrupamentos de DNA ribossômico, RNA e proteínas.',
+                func: 'Transcrição de RNA ribossômico (rRNA) e montagem das subunidades dos ribossomos.',
+                composition: 'rRNA, proteínas ribossomais e alças de cromatina organizadoras do nucléolo.',
+                cameraOffset: new THREE.Vector3(3.2, 2.1, 3.8),
+                targetPoint: new THREE.Vector3(0, 0.3, 0),
+                explodeDir: new THREE.Vector3(0, 0.6, 0)
+            },
+            rer: {
+                id: 'rer',
+                name: 'Retículo Endoplasmático Rugoso (RER)',
+                shortName: 'Retículo Rugoso (RER)',
+                category: 'Síntese Proteica',
+                color: '#f97316',
+                description: 'Sistema de cisternas e sacos achatados contínuos à membrana externa do núcleo, com aspecto granuloso devido aos milhares de ribossomos aderidos à sua superfície citosólica.',
+                func: 'Síntese, dobramento e glicosilação inicial de proteínas destinadas à secreção ou membranas.',
+                composition: 'Membranas lipoproteicas em cisternas e ribossomos ativos acoplados.',
+                cameraOffset: new THREE.Vector3(5.8, 3.5, 6.2),
+                targetPoint: new THREE.Vector3(-1.8, 0.2, 1.8),
+                explodeDir: new THREE.Vector3(-1.4, 0.2, 1.4)
+            },
+            rel: {
+                id: 'rel',
+                name: 'Retículo Endoplasmático Liso (REL)',
+                shortName: 'Retículo Liso (REL)',
+                category: 'Síntese Lipídica',
+                color: '#eab308',
+                description: 'Rede de túbulos membranosos interconectados que se ramificam a partir do retículo rugoso, desprovidos de ribossomos em sua superfície.',
+                func: 'Síntese de fosfolipídios e esteroides, desintoxicação celular e armazenamento de íons cálcio (Ca²⁺).',
+                composition: 'Túbulos lipoproteicos ricos em enzimas metabólicas (como o citocromo P450).',
+                cameraOffset: new THREE.Vector3(6.2, 3.2, 5.5),
+                targetPoint: new THREE.Vector3(-2.6, -1.2, 1.5),
+                explodeDir: new THREE.Vector3(-2.1, -0.9, 1.2)
+            },
+            golgi: {
+                id: 'golgi',
+                name: 'Complexo de Golgi (Aparato de Golgi)',
+                shortName: 'Complexo de Golgi',
+                category: 'Processamento e Secreção',
+                color: '#10b981',
+                description: 'Conjunto de pilhas de sáculos achatados e curvados (dictiossomos) com faces cis (receptora) e trans (de expedição), de onde brotam vesículas secretoras dinâmicas.',
+                func: 'Modificação pós-traducional, empacotamento, endereçamento de proteínas e formação de lisossomos.',
+                composition: 'Cisternas membranosas polarizadas e vesículas de transporte/secreção.',
+                cameraOffset: new THREE.Vector3(6.0, 2.8, 6.0),
+                targetPoint: new THREE.Vector3(2.4, -1.3, 2.2),
+                explodeDir: new THREE.Vector3(1.8, -1.0, 1.6)
+            },
+            mitocondria: {
+                id: 'mitocondria',
+                name: 'Mitocôndrias',
+                shortName: 'Mitocôndrias',
+                category: 'Bioenergética',
+                color: '#ef4444',
+                description: 'Organelas com dupla membrana: uma externa lisa e uma interna altamente pregueada formando as cristas mitocondriais (visíveis no corte frontal), além de possuírem DNA próprio.',
+                func: 'Respiração celular aeróbica (ciclo de Krebs e fosforilação oxidativa) para produção de ATP.',
+                composition: 'Membrana externa, espaço intermembranar, cristas internas, matriz mitocondrial e mtDNA.',
+                cameraOffset: new THREE.Vector3(5.5, 2.5, 6.5),
+                targetPoint: new THREE.Vector3(2.3, 1.3, 2.4),
+                explodeDir: new THREE.Vector3(1.8, 1.1, 1.8)
+            },
+            ribossomos: {
+                id: 'ribossomos',
+                name: 'Ribossomos Livres',
+                shortName: 'Ribossomos',
+                category: 'Tradução Genética',
+                color: '#fde047',
+                description: 'Complexos macromoleculares granulares dispersos pelo citosol (além dos aderidos ao RER), compostos por duas subunidades (maior 60S e menor 40S em eucariontes).',
+                func: 'Leitura do RNA mensageiro (mRNA) e síntese de cadeias polipeptídicas (proteínas citosólicas).',
+                composition: 'RNA ribossômico (rRNA) e dezenas de proteínas ribossomais.',
+                cameraOffset: new THREE.Vector3(6.0, 3.0, 6.0),
+                targetPoint: new THREE.Vector3(0.8, 2.3, 1.8),
+                explodeDir: new THREE.Vector3(0.5, 1.5, 1.1)
+            },
+            lisossomos: {
+                id: 'lisossomos',
+                name: 'Lisossomos e Peroxissomos',
+                shortName: 'Lisossomos',
+                category: 'Digestão Intracelular',
+                color: '#c084fc',
+                description: 'Vesículas esféricas delimitadas por membrana simples que mantêm um interior ácido repleto de enzimas hidrolíticas e oxidativas.',
+                func: 'Digestão de partículas fagocitadas, reciclagem de organelas envelhecidas (autofagia) e degradação de peróxidos.',
+                composition: 'Membrana resistente à acidez e mais de 40 tipos de hidrolases ácidas.',
+                cameraOffset: new THREE.Vector3(5.8, 2.5, 6.2),
+                targetPoint: new THREE.Vector3(-1.4, -2.3, 2.4),
+                explodeDir: new THREE.Vector3(-1.1, -1.7, 1.8)
+            },
+            centriolos: {
+                id: 'centriolos',
+                name: 'Centríolos (Centrossomo)',
+                shortName: 'Centríolos',
+                category: 'Divisão e Organização',
+                color: '#facc15',
+                description: 'Par de estruturas cilíndricas dispostas perpendicularmente entre si próximo ao núcleo, cada uma formada por 9 conjuntos de 3 microtúbulos.',
+                func: 'Organização do fuso mitótico durante a divisão celular e formação de cílios e flagelos.',
+                composition: 'Proteína tubulina organizada em 9 tripletos periféricos de microtúbulos.',
+                cameraOffset: new THREE.Vector3(5.0, 3.6, 5.5),
+                targetPoint: new THREE.Vector3(1.5, 2.1, -0.8),
+                explodeDir: new THREE.Vector3(1.2, 1.6, -0.6)
+            },
+            citoesqueleto: {
+                id: 'citoesqueleto',
+                name: 'Citoplasma e Citoesqueleto',
+                shortName: 'Citoesqueleto',
+                category: 'Sustentação Dinâmica',
+                color: '#38bdf8',
+                description: 'O citoplasma engloba o citosol (matriz aquosa gelatinosa) e uma rede tridimensional dinâmica de microtúbulos, filamentos intermediários e microfilamentos de actina.',
+                func: 'Manutenção da forma celular, ancoragem de organelas e trilhos para transporte intracelular.',
+                composition: 'Água, íons, enzimas solúveis, actina, tubulina e proteínas motoras.',
+                cameraOffset: new THREE.Vector3(7.5, 4.0, 7.5),
+                targetPoint: new THREE.Vector3(0, -1.5, 2.5),
+                explodeDir: new THREE.Vector3(0, -0.8, 1.2)
+            }
+        };
+
+        /**
+         * ============================================================================
+         * VARIÁVEIS GLOBAIS DA CENA E ESTADO DE INTERAÇÃO
+         * ============================================================================
+         */
+        let scene, camera, renderer;
+        let cellRootGroup;
+        const organelleGroups = {};     // Mapeia ID -> THREE.Group
+        const interactiveMeshes = [];   // Meshes clicáveis para Raycasting
+        const labelElements = {};       // Mapeia ID -> HTMLElement do rótulo 3D
+        const animatedObjects = {
+            mitochondria: [],
+            vesicles: [],
+            freeRibosomes: null,
+            ribosomeBasePositions: [],
+            cytosolParticles: null,
+            membraneGroup: null,
+            cutawayGroup: null,
+            fullShellMesh: null
+        };
+
+        // Estado da UI e Simulação
+        const state = {
+            selectedId: null,
+            hoveredId: null,
+            showLabels: true,
+            isCutaway: true,
+            isAnimating: true,
+            explodeFactor: 0,
+            drawerMinimized: false
+        };
+
+        // Estado da Câmera Orbital Suave (Esférica)
+        const camControl = {
+            radius: 15.5,
+            targetRadius: 15.5,
+            minRadius: 3.2,
+            maxRadius: 32.0,
+            theta: 0.72,          // Ângulo horizontal
+            targetTheta: 0.72,
+            phi: 1.12,            // Ângulo polar (vertical)
+            targetPhi: 1.12,
+            target: new THREE.Vector3(0, 0, 0),
+            desiredTarget: new THREE.Vector3(0, 0, 0),
+            isAutoFocusing: false,
+            isDragging: false,
+            isPanning: false,
+            prevMouse: { x: 0, y: 0 },
+            prevPinchDist: 0
+        };
+
+        /**
+         * ============================================================================
+         * INICIALIZAÇÃO PRINCIPAL (WINDOW.ONLOAD)
+         * ============================================================================
+         */
+        window.onload = function () {
+            try {
+                initScene();
+                buildHumanCell();
+                initUI();
+                initInteractionEvents();
+                animate();
+            } catch (err) {
+                console.error('Erro ao inicializar a célula 3D:', err);
+            }
+        };
+
+        /**
+         * Configura a cena Three.js, câmera, iluminação cinematográfica e renderizador
+         */
+        function initScene() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x060c18, 0.018);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 150);
+            updateCameraPosition(true);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.15;
+            container.appendChild(renderer.domElement);
+
+            // Iluminação Ambiente e Direcional Multi-ângulo para profundidade anatômica
+            const hemiLight = new THREE.HemisphereLight(0x7dd3fc, 0x1e1b4b, 0.9);
+            scene.add(hemiLight);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.35);
+            keyLight.position.set(12, 16, 14);
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.65);
+            fillLight.position.set(-14, -8, 10);
+            scene.add(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xc084fc, 0.55);
+            rimLight.position.set(-6, 12, -14);
+            scene.add(rimLight);
+
+            // Luz interna suave emanando do núcleo para destacar as organelas vizinhas
+            const nucleusGlow = new THREE.PointLight(0xa855f7, 1.2, 12);
+            nucleusGlow.position.set(0, 0.3, 0);
+            scene.add(nucleusGlow);
+
+            cellRootGroup = new THREE.Group();
+            scene.add(cellRootGroup);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        /**
+         * ============================================================================
+         * CONSTRUÇÃO PROCEDURAL DAS ESTRUTURAS DA CÉLULA HUMANA (3D)
+         * ============================================================================
+         */
+        function buildHumanCell() {
+            buildPlasmaMembraneAndBilayer();
+            buildNucleusAndNucleolus();
+            buildRoughEndoplasmicReticulum();
+            buildSmoothEndoplasmicReticulum();
+            buildGolgiApparatus();
+            buildMitochondria();
+            buildCentrioles();
+            buildLysosomes();
+            buildFreeRibosomes();
+            buildCytoskeletonAndCytosol();
+        }
+
+        /**
+         * Registra um mesh como interativo para detecção de clique e hover
+         */
+        function registerInteractive(mesh, organelleId) {
+            mesh.userData.organelleId = organelleId;
+            interactiveMeshes.push(mesh);
+        }
+
+        /**
+         * 1. MEMBRANA PLASMÁTICA E CAMADA BILIPÍDICA DETALHADA (CORTE TRANSVERSAL)
+         */
+        function buildPlasmaMembraneAndBilayer() {
+            const group = new THREE.Group();
+            organelleGroups['membrana'] = group;
+            cellRootGroup.add(group);
+
+            const R_OUTER = 5.4;
+            const R_INNER = 5.05;
+
+            // Grupo do corte anatômico (3/4 de esfera aberta voltada para a câmera)
+            const cutawayGroup = new THREE.Group();
+            animatedObjects.cutawayGroup = cutawayGroup;
+            group.add(cutawayGroup);
+
+            // Ângulo do corte: deixa um quadrante frontal aberto (de phi = 0.15 até 1.35 rad)
+            const cutStart = 0.12;
+            const cutEnd = 1.38;
+            const phiStart = cutEnd;
+            const phiLength = Math.PI * 2 - (cutEnd - cutStart);
+
+            // Camada externa translúcida da membrana
+            const outerGeo = new THREE.SphereGeometry(R_OUTER, 64, 48, phiStart, phiLength, 0, Math.PI);
+            const outerMat = new THREE.MeshPhysicalMaterial({
+                color: 0x06b6d4,
+                emissive: 0x083344,
+                emissiveIntensity: 0.35,
+                roughness: 0.25,
+                metalness: 0.05,
+                transparent: true,
+                opacity: 0.24,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const outerShell = new THREE.Mesh(outerGeo, outerMat);
+            registerInteractive(outerShell, 'membrana');
+            cutawayGroup.add(outerShell);
+
+            // Camada interna da membrana
+            const innerGeo = new THREE.SphereGeometry(R_INNER, 64, 48, phiStart, phiLength, 0, Math.PI);
+            const innerMat = new THREE.MeshPhongMaterial({
+                color: 0x22d3ee,
+                emissive: 0x0e7490,
+                emissiveIntensity: 0.25,
+                transparent: true,
+                opacity: 0.16,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const innerShell = new THREE.Mesh(innerGeo, innerMat);
+            cutawayGroup.add(innerShell);
+
+            // Esfera completa (para quando o usuário alternar para "Membrana Completa")
+            const fullGeo = new THREE.SphereGeometry(R_OUTER, 64, 48);
+            const fullMat = outerMat.clone();
+            fullMat.opacity = 0.34;
+            const fullShell = new THREE.Mesh(fullGeo, fullMat);
+            fullShell.visible = false;
+            registerInteractive(fullShell, 'membrana');
+            group.add(fullShell);
+            animatedObjects.fullShellMesh = fullShell;
+
+            // CONSTRUÇÃO DA CAMADA BILIPÍDICA NAS BORDAS DO CORTE (FOSFOLIPÍDIOS + PROTEÍNAS)
+            const cutAngles = [cutStart, cutEnd];
+            const thetaSteps = 68; // Quantidade de fosfolipídios ao longo de cada arco de corte
+
+            const headOuterGeo = new THREE.SphereGeometry(0.085, 10, 10);
+            const headOuterMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.4, shininess: 80 });
+
+            const headInnerGeo = new THREE.SphereGeometry(0.085, 10, 10);
+            const headInnerMat = new THREE.MeshPhongMaterial({ color: 0x2dd4bf, emissive: 0x0d9488, emissiveIntensity: 0.4, shininess: 80 });
+
+            const tailGeo = new THREE.CylinderGeometry(0.022, 0.022, (R_OUTER - R_INNER) * 0.85, 6);
+            const tailMat = new THREE.MeshLambertMaterial({ color: 0xfde047, emissive: 0x854d0e, emissiveIntensity: 0.3 });
+
+            const totalLipids = cutAngles.length * (thetaSteps - 1);
+            const outerHeadsInst = new THREE.InstancedMesh(headOuterGeo, headOuterMat, totalLipids);
+            const innerHeadsInst = new THREE.InstancedMesh(headInnerGeo, headInnerMat, totalLipids);
+            const tailsInst1 = new THREE.InstancedMesh(tailGeo, tailMat, totalLipids);
+            const tailsInst2 = new THREE.InstancedMesh(tailGeo, tailMat, totalLipids);
+
+            const dummy = new THREE.Object3D();
+            const upVec = new THREE.Vector3(0, 1, 0);
+            let idx = 0;
+
+            cutAngles.forEach((phi) => {
+                // Em Three.js SphereGeometry: x = -r * cos(phi) * sin(theta), y = r * cos(theta), z = r * sin(phi) * sin(theta)
+                const tangent = new THREE.Vector3(Math.sin(phi), 0, Math.cos(phi)).normalize();
+
+                for (let i = 1; i < thetaSteps; i++) {
+                    const theta = (i / thetaSteps) * Math.PI;
+                    const sinT = Math.sin(theta);
+                    const cosT = Math.cos(theta);
+
+                    const normal = new THREE.Vector3(
+                        -Math.cos(phi) * sinT,
+                        cosT,
+                        Math.sin(phi) * sinT
+                    ).normalize();
+
+                    // Cabeça hidrofílica externa
+                    dummy.position.copy(normal).multiplyScalar(R_OUTER);
+                    dummy.rotation.set(0, 0, 0);
+                    dummy.updateMatrix();
+                    outerHeadsInst.setMatrixAt(idx, dummy.matrix);
+
+                    // Cabeça hidrofílica interna
+                    dummy.position.copy(normal).multiplyScalar(R_INNER);
+                    dummy.updateMatrix();
+                    innerHeadsInst.setMatrixAt(idx, dummy.matrix);
+
+                    // Duas caudas hidrofóbicas paralelas no interior da bicamada
+                    const midRadius = (R_OUTER + R_INNER) * 0.5;
+                    const quat = new THREE.Quaternion().setFromUnitVectors(upVec, normal);
+
+                    dummy.position.copy(normal).multiplyScalar(midRadius).addScaledVector(tangent, 0.025);
+                    dummy.quaternion.copy(quat);
+                    dummy.updateMatrix();
+                    tailsInst1.setMatrixAt(idx, dummy.matrix);
+
+                    dummy.position.copy(normal).multiplyScalar(midRadius).addScaledVector(tangent, -0.025);
+                    dummy.quaternion.copy(quat);
+                    dummy.updateMatrix();
+                    tailsInst2.setMatrixAt(idx, dummy.matrix);
+
+                    idx++;
+                }
+
+                // Adiciona Proteínas Transmembranares (Canais Iônicos) incrustadas na bicamada
+                [0.65, 1.35, 2.25].forEach((pTheta) => {
+                    const sinT = Math.sin(pTheta);
+                    const cosT = Math.cos(pTheta);
+                    const normal = new THREE.Vector3(-Math.cos(phi) * sinT, cosT, Math.sin(phi) * sinT).normalize();
+                    const midRadius = (R_OUTER + R_INNER) * 0.5;
+
+                    const proteinGroup = new THREE.Group();
+                    proteinGroup.position.copy(normal).multiplyScalar(midRadius);
+                    proteinGroup.quaternion.setFromUnitVectors(upVec, normal);
+
+                    const channelGeo = new THREE.CylinderGeometry(0.18, 0.21, 0.52, 14, 1, true);
+                    const channelMat = new THREE.MeshPhongMaterial({
+                        color: 0xa855f7,
+                        emissive: 0x581c87,
+                        emissiveIntensity: 0.45,
+                        side: THREE.DoubleSide,
+                        shininess: 90
+                    });
+                    const channelMesh = new THREE.Mesh(channelGeo, channelMat);
+                    registerInteractive(channelMesh, 'membrana');
+                    proteinGroup.add(channelMesh);
+
+                    // Anéis superior e inferior da proteína canal
+                    const ringGeo = new THREE.TorusGeometry(0.17, 0.055, 10, 18);
+                    ringGeo.rotateX(Math.PI / 2);
+                    const ringTop = new THREE.Mesh(ringGeo, channelMat);
+                    ringTop.position.y = 0.24;
+                    const ringBot = new THREE.Mesh(ringGeo, channelMat);
+                    ringBot.position.y = -0.24;
+                    proteinGroup.add(ringTop, ringBot);
+
+                    cutawayGroup.add(proteinGroup);
+                });
+            });
+
+            registerInteractive(outerHeadsInst, 'membrana');
+            registerInteractive(innerHeadsInst, 'membrana');
+            cutawayGroup.add(outerHeadsInst, innerHeadsInst, tailsInst1, tailsInst2);
+            animatedObjects.membraneGroup = group;
+        }
+
+        /**
+         * 2 & 3. NÚCLEO CELULAR (CARIOTECA COM POROS, CROMATINA E NUCLÉOLO)
+         */
+        function buildNucleusAndNucleolus() {
+            const nucleusGroup = new THREE.Group();
+            nucleusGroup.position.set(0, 0.3, 0);
+            organelleGroups['nucleo'] = nucleusGroup;
+            cellRootGroup.add(nucleusGroup);
+
+            const N_RADIUS = 1.65;
+            // Corte frontal de 3/4 no núcleo para revelar o nucléolo e a cromatina
+            const phiStart = 1.35;
+            const phiLength = Math.PI * 2 - 1.25;
+
+            // Carioteca (Envelope Nuclear Duplo)
+            const outerNucGeo = new THREE.SphereGeometry(N_RADIUS, 48, 36, phiStart, phiLength, 0, Math.PI);
+            const outerNucMat = new THREE.MeshPhysicalMaterial({
+                color: 0x7c3aed,
+                emissive: 0x3b0764,
+                emissiveIntensity: 0.4,
+                roughness: 0.35,
+                metalness: 0.1,
+                side: THREE.DoubleSide
+            });
+            const outerNucMesh = new THREE.Mesh(outerNucGeo, outerNucMat);
+            registerInteractive(outerNucMesh, 'nucleo');
+            nucleusGroup.add(outerNucMesh);
+
+            // Camada interna da carioteca
+            const innerNucGeo = new THREE.SphereGeometry(N_RADIUS - 0.1, 48, 36, phiStart, phiLength, 0, Math.PI);
+            const innerNucMat = new THREE.MeshPhongMaterial({
+                color: 0xa78bfa,
+                emissive: 0x4c1d95,
+                emissiveIntensity: 0.35,
+                side: THREE.DoubleSide
+            });
+            const innerNucMesh = new THREE.Mesh(innerNucGeo, innerNucMat);
+            registerInteractive(innerNucMesh, 'nucleo');
+            nucleusGroup.add(innerNucMesh);
+
+            // Borda do corte nuclear (anel espesso conectando as duas membranas)
+            [0.1, 1.35].forEach((phi) => {
+                const rimPts = [];
+                for (let i = 0; i <= 32; i++) {
+                    const t = (i / 32) * Math.PI;
+                    rimPts.push(new THREE.Vector3(
+                        -(N_RADIUS - 0.05) * Math.cos(phi) * Math.sin(t),
+                        (N_RADIUS - 0.05) * Math.cos(t),
+                        (N_RADIUS - 0.05) * Math.sin(phi) * Math.sin(t)
+                    ));
+                }
+                const rimCurve = new THREE.CatmullRomCurve3(rimPts);
+                const rimGeo = new THREE.TubeGeometry(rimCurve, 32, 0.06, 8, false);
+                const rimMat = new THREE.MeshPhongMaterial({ color: 0xc4b5fd, emissive: 0x5b21b6, emissiveIntensity: 0.4 });
+                nucleusGroup.add(new THREE.Mesh(rimGeo, rimMat));
+            });
+
+            // Poros Nucleares distribuídos sobre a superfície da carioteca
+            const poreGeo = new THREE.TorusGeometry(0.08, 0.028, 8, 14);
+            const poreMat = new THREE.MeshPhongMaterial({ color: 0xf0abfc, emissive: 0x86198f, emissiveIntensity: 0.5 });
+            const up = new THREE.Vector3(0, 0, 1);
+
+            for (let i = 0; i < 42; i++) {
+                const phi = phiStart + Math.random() * (phiLength - 0.2) + 0.1;
+                const theta = 0.25 + Math.random() * (Math.PI - 0.5);
+                const normal = new THREE.Vector3(
+                    -Math.cos(phi) * Math.sin(theta),
+                    Math.cos(theta),
+                    Math.sin(phi) * Math.sin(theta)
+                ).normalize();
+
+                const pore = new THREE.Mesh(poreGeo, poreMat);
+                pore.position.copy(normal).multiplyScalar(N_RADIUS + 0.01);
+                pore.quaternion.setFromUnitVectors(up, normal);
+                registerInteractive(pore, 'nucleo');
+                nucleusGroup.add(pore);
+            }
+
+            // Filamentos de Cromatina (DNA enovelado) no interior do nucleoplasma
+            const chromPts = [];
+            for (let i = 0; i < 45; i++) {
+                const angle = i * 0.55;
+                const rad = 0.65 + Math.sin(i * 1.3) * 0.45;
+                chromPts.push(new THREE.Vector3(
+                    Math.cos(angle) * rad,
+                    Math.sin(i * 0.7) * 0.9,
+                    Math.sin(angle) * rad
+                ));
+            }
+            const chromCurve = new THREE.CatmullRomCurve3(chromPts);
+            const chromGeo = new THREE.TubeGeometry(chromCurve, 120, 0.032, 6, false);
+            const chromMat = new THREE.MeshPhongMaterial({
+                color: 0xd8b4fe,
+                emissive: 0x6b21a8,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.85
+            });
+            const chromMesh = new THREE.Mesh(chromGeo, chromMat);
+            registerInteractive(chromMesh, 'nucleo');
+            nucleusGroup.add(chromMesh);
+
+            // NUCLÉOLO (Esfera densa central)
+            const nucleolusGroup = new THREE.Group();
+            organelleGroups['nucleolo'] = nucleolusGroup;
+            nucleusGroup.add(nucleolusGroup);
+
+            const nucCoreGeo = new THREE.IcosahedronGeometry(0.56, 3);
+            // Leve rugosidade orgânica no nucléolo
+            const posAttr = nucCoreGeo.attributes.position;
+            for (let i = 0; i < posAttr.count; i++) {
+                const vx = posAttr.getX(i);
+                const vy = posAttr.getY(i);
+                const vz = posAttr.getZ(i);
+                const n = 1 + 0.07 * Math.sin(vx * 9) * Math.cos(vy * 9) * Math.sin(vz * 9);
+                posAttr.setXYZ(i, vx * n, vy * n, vz * n);
+            }
+            nucCoreGeo.computeVertexNormals();
+
+            const nucCoreMat = new THREE.MeshPhysicalMaterial({
+                color: 0xec4899,
+                emissive: 0x9d174d,
+                emissiveIntensity: 0.65,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+            const nucleolusMesh = new THREE.Mesh(nucCoreGeo, nucCoreMat);
+            registerInteractive(nucleolusMesh, 'nucleolo');
+            nucleolusGroup.add(nucleolusMesh);
+        }
+
+        /**
+         * 4. RETÍCULO ENDOPLASMÁTICO RUGOSO (RER) COM RIBOSSOMOS ADERIDOS
+         */
+        function buildRoughEndoplasmicReticulum() {
+            const rerGroup = new THREE.Group();
+            organelleGroups['rer'] = rerGroup;
+            cellRootGroup.add(rerGroup);
+
+            const rerMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf97316,
+                emissive: 0x7c2d12,
+                emissiveIntensity: 0.35,
+                roughness: 0.4,
+                side: THREE.DoubleSide
+            });
+
+            const riboGeo = new THREE.SphereGeometry(0.042, 6, 6);
+            const riboMat = new THREE.MeshLambertMaterial({ color: 0xfef08a, emissive: 0xca8a04, emissiveIntensity: 0.4 });
+            const riboPositions = [];
+
+            // Cria 4 cisternas curvas concêntricas abraçando a lateral esquerda/inferior do núcleo
+            const radii = [2.0, 2.28, 2.56, 2.84];
+            radii.forEach((rad, idx) => {
+                const arcLength = 1.65 - idx * 0.1;
+                const torusGeo = new THREE.TorusGeometry(rad, 0.11, 14, 42, arcLength);
+                const cisterna = new THREE.Mesh(torusGeo, rerMat);
+
+                cisterna.position.set(-0.2, 0.15 + (idx - 1.5) * 0.28, 0.2);
+                cisterna.rotation.set(Math.PI * 0.38, 0.45, Math.PI * 0.58);
+                cisterna.scale.set(1, 1, 1.85); // Achata formando sacos lamelares
+
+                registerInteractive(cisterna, 'rer');
+                rerGroup.add(cisterna);
+
+                // Gera pontos na superfície da cisterna para fixar ribossomos
+                cisterna.updateMatrixWorld(true);
+                for (let r = 0; r < 45; r++) {
+                    const u = Math.random() * arcLength;
+                    const v = Math.random() * Math.PI * 2;
+                    const localPt = new THREE.Vector3(
+                        (rad + 0.12 * Math.cos(v)) * Math.cos(u),
+                        (rad + 0.12 * Math.cos(v)) * Math.sin(u),
+                        0.12 * Math.sin(v)
+                    );
+                    localPt.applyMatrix4(cisterna.matrixWorld);
+                    riboPositions.push(localPt);
+                }
+            });
+
+            // InstancedMesh de ribossomos aderidos ao RER
+            const boundRibos = new THREE.InstancedMesh(riboGeo, riboMat, riboPositions.length);
+            const dummy = new THREE.Object3D();
+            riboPositions.forEach((pt, i) => {
+                dummy.position.copy(pt);
+                dummy.updateMatrix();
+                boundRibos.setMatrixAt(i, dummy.matrix);
+            });
+            registerInteractive(boundRibos, 'rer');
+            rerGroup.add(boundRibos);
+        }
+
+        /**
+         * 5. RETÍCULO ENDOPLASMÁTICO LISO (REL - REDE TUBULAR)
+         */
+        function buildSmoothEndoplasmicReticulum() {
+            const relGroup = new THREE.Group();
+            organelleGroups['rel'] = relGroup;
+            cellRootGroup.add(relGroup);
+
+            const relMat = new THREE.MeshPhysicalMaterial({
+                color: 0xeab308,
+                emissive: 0x713f12,
+                emissiveIntensity: 0.35,
+                roughness: 0.35
+            });
+
+            // Ramificações tubulares orgânicas partindo da extremidade do RER
+            const branches = [
+                [
+                    new THREE.Vector3(-2.1, -0.7, 1.3),
+                    new THREE.Vector3(-2.6, -1.1, 1.7),
+                    new THREE.Vector3(-3.1, -1.5, 1.3),
+                    new THREE.Vector3(-3.5, -1.2, 0.7)
+                ],
+                [
+                    new THREE.Vector3(-2.5, -1.0, 1.6),
+                    new THREE.Vector3(-2.3, -1.7, 2.0),
+                    new THREE.Vector3(-2.8, -2.1, 1.6),
+                    new THREE.Vector3(-3.2, -1.9, 2.1)
+                ],
+                [
+                    new THREE.Vector3(-2.8, -1.3, 1.4),
+                    new THREE.Vector3(-3.3, -0.8, 1.9),
+                    new THREE.Vector3(-3.7, -1.3, 2.2)
+                ],
+                [
+                    new THREE.Vector3(-2.3, -1.6, 1.9),
+                    new THREE.Vector3(-1.9, -2.0, 1.4),
+                    new THREE.Vector3(-2.4, -2.4, 0.9)
+                ]
+            ];
+
+            branches.forEach((pts) => {
+                const curve = new THREE.CatmullRomCurve3(pts);
+                const tubeGeo = new THREE.TubeGeometry(curve, 28, 0.11, 10, false);
+                const tube = new THREE.Mesh(tubeGeo, relMat);
+                registerInteractive(tube, 'rel');
+                relGroup.add(tube);
+
+                // Terminações arredondadas nos túbulos
+                [pts[0], pts[pts.length - 1]].forEach((endPt) => {
+                    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), relMat);
+                    cap.position.copy(endPt);
+                    relGroup.add(cap);
+                });
+            });
+        }
+
+        /**
+         * 6. COMPLEXO DE GOLGI (PILHAS DE CISTERNAS + VESÍCULAS SECRETORAS ANIMADAS)
+         */
+        function buildGolgiApparatus() {
+            const golgiGroup = new THREE.Group();
+            golgiGroup.position.set(2.3, -1.3, 2.0);
+            golgiGroup.rotation.set(0.3, -0.6, -0.45);
+            organelleGroups['golgi'] = golgiGroup;
+            cellRootGroup.add(golgiGroup);
+
+            const golgiMat = new THREE.MeshPhysicalMaterial({
+                color: 0x10b981,
+                emissive: 0x064e3b,
+                emissiveIntensity: 0.4,
+                roughness: 0.3
+            });
+
+            // 5 cisternas curvas empilhadas com extremidades dilatadas
+            for (let i = 0; i < 5; i++) {
+                const width = 1.45 - Math.abs(i - 2) * 0.18;
+                const curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(-width, i * 0.22 - 0.44, 0.22),
+                    new THREE.Vector3(-width * 0.5, i * 0.22 - 0.44, 0.04),
+                    new THREE.Vector3(0, i * 0.22 - 0.44, -0.04),
+                    new THREE.Vector3(width * 0.5, i * 0.22 - 0.44, 0.04),
+                    new THREE.Vector3(width, i * 0.22 - 0.44, 0.22)
+                ]);
+
+                const tubeGeo = new THREE.TubeGeometry(curve, 24, 0.068, 10, false);
+                const cisterna = new THREE.Mesh(tubeGeo, golgiMat);
+                cisterna.scale.set(1, 0.75, 1.65);
+                registerInteractive(cisterna, 'golgi');
+                golgiGroup.add(cisterna);
+
+                // Bulbos nas extremidades das cisternas
+                [-1, 1].forEach((side) => {
+                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), golgiMat);
+                    bulb.position.set(side * width, i * 0.22 - 0.44, 0.22);
+                    registerInteractive(bulb, 'golgi');
+                    golgiGroup.add(bulb);
+                });
+            }
+
+            // Vesículas secretoras brotando e viajando em direção à membrana
+            const vesMat = new THREE.MeshPhongMaterial({
+                color: 0x34d399,
+                emissive: 0x059669,
+                emissiveIntensity: 0.55
+            });
+
+            for (let v = 0; v < 7; v++) {
+                const radius = 0.09 + (v % 3) * 0.025;
+                const vesicle = new THREE.Mesh(new THREE.SphereGeometry(radius, 12, 12), vesMat);
+                vesicle.userData.phase = (v / 7) * Math.PI * 2;
+                vesicle.userData.lane = (v % 3) - 1;
+                registerInteractive(vesicle, 'golgi');
+                golgiGroup.add(vesicle);
+                animatedObjects.vesicles.push(vesicle);
+            }
+        }
+
+        /**
+         * 7. MITOCÔNDRIAS (INCLUINDO MITOCÔNDRIA EM CORTE COM CRISTAS INTERNAS VISÍVEIS)
+         */
+        function buildMitochondria() {
+            const mitoRoot = new THREE.Group();
+            organelleGroups['mitocondria'] = mitoRoot;
+            cellRootGroup.add(mitoRoot);
+
+            const configs = [
+                { pos: new THREE.Vector3(2.3, 1.35, 2.3), rot: new THREE.Euler(0.4, -0.5, 0.6), cutaway: true, scale: 1.05 },
+                { pos: new THREE.Vector3(-2.6, 1.7, 1.4), rot: new THREE.Euler(-0.3, 0.8, -0.5), cutaway: false, scale: 0.92 },
+                { pos: new THREE.Vector3(0.4, -2.5, 2.4), rot: new THREE.Euler(0.2, 0.3, 1.3), cutaway: false, scale: 0.95 },
+                { pos: new THREE.Vector3(-0.6, 2.7, -1.8), rot: new THREE.Euler(0.7, -0.4, 0.2), cutaway: false, scale: 0.9 },
+                { pos: new THREE.Vector3(2.8, -0.6, -2.1), rot: new THREE.Euler(-0.5, 0.6, 0.9), cutaway: false, scale: 0.88 }
+            ];
+
+            configs.forEach((cfg) => {
+                const mGroup = new THREE.Group();
+                mGroup.position.copy(cfg.pos);
+                mGroup.rotation.copy(cfg.rot);
+                mGroup.scale.setScalar(cfg.scale);
+
+                // Membrana Externa (Cápsula)
+                const outerMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xef4444,
+                    emissive: 0x7f1d1d,
+                    emissiveIntensity: 0.45,
+                    roughness: 0.3,
+                    transparent: cfg.cutaway,
+                    opacity: cfg.cutaway ? 0.55 : 0.95,
+                    side: THREE.DoubleSide
+                });
+
+                const bodyGeo = new THREE.CylinderGeometry(0.44, 0.44, 1.15, 24, 1, cfg.cutaway, cfg.cutaway ? 0.8 : 0, cfg.cutaway ? Math.PI * 1.45 : Math.PI * 2);
+                bodyGeo.rotateZ(Math.PI / 2);
+                const bodyMesh = new THREE.Mesh(bodyGeo, outerMat);
+                registerInteractive(bodyMesh, 'mitocondria');
+                mGroup.add(bodyMesh);
+
+                // Calotas arredondadas das extremidades
+                [-0.575, 0.575].forEach((xEnd, sideIdx) => {
+                    const capGeo = new THREE.SphereGeometry(0.44, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+                    capGeo.rotateZ(sideIdx === 0 ? Math.PI / 2 : -Math.PI / 2);
+                    const capMesh = new THREE.Mesh(capGeo, outerMat);
+                    capMesh.position.x = xEnd;
+                    registerInteractive(capMesh, 'mitocondria');
+                    mGroup.add(capMesh);
+                });
+
+                // Cristas Mitocondriais (Membrana Interna Dobrada em Zigue-Zague)
+                const cristaePts = [];
+                const folds = 9;
+                for (let i = 0; i <= folds; i++) {
+                    const t = (i / folds) * 1.2 - 0.6;
+                    const yOffset = (i % 2 === 0 ? 1 : -1) * 0.25;
+                    cristaePts.push(new THREE.Vector3(t, yOffset, 0));
+                }
+                const cristaeCurve = new THREE.CatmullRomCurve3(cristaePts);
+                const cristaeGeo = new THREE.TubeGeometry(cristaeCurve, 48, 0.065, 8, false);
+                cristaeGeo.scale(1, 1, 2.6);
+                const cristaeMat = new THREE.MeshPhongMaterial({
+                    color: 0xfb923c,
+                    emissive: 0xea580c,
+                    emissiveIntensity: 0.65,
+                    shininess: 80
+                });
+                const cristaeMesh = new THREE.Mesh(cristaeGeo, cristaeMat);
+                registerInteractive(cristaeMesh, 'mitocondria');
+                mGroup.add(cristaeMesh);
+
+                mitoRoot.add(mGroup);
+                animatedObjects.mitochondria.push(mGroup);
+            });
+        }
+
+        /**
+         * 8. RIBOSSOMOS LIVRES NO CITOSOL
+         */
+        function buildFreeRibosomes() {
+            const riboGroup = new THREE.Group();
+            organelleGroups['ribossomos'] = riboGroup;
+            cellRootGroup.add(riboGroup);
+
+            const count = 90;
+            const geo = new THREE.SphereGeometry(0.055, 8, 8);
+            const mat = new THREE.MeshPhongMaterial({
+                color: 0xfde047,
+                emissive: 0xa16207,
+                emissiveIntensity: 0.5
+            });
+
+            const instanced = new THREE.InstancedMesh(geo, mat, count);
+            const dummy = new THREE.Object3D();
+
+            for (let i = 0; i < count; i++) {
+                // Distribui no citosol (entre raio 2.0 e 4.6, evitando colidir com o núcleo)
+                const r = 2.1 + Math.random() * 2.5;
+                const theta = Math.random() * Math.PI;
+                const phi = Math.random() * Math.PI * 2;
+                const pos = new THREE.Vector3(
+                    r * Math.sin(theta) * Math.cos(phi),
+                    r * Math.cos(theta),
+                    r * Math.sin(theta) * Math.sin(phi)
+                );
+                animatedObjects.ribosomeBasePositions.push({
+                    base: pos.clone(),
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.6 + Math.random() * 0.8
+                });
+                dummy.position.copy(pos);
+                dummy.updateMatrix();
+                instanced.setMatrixAt(i, dummy.matrix);
+            }
+
+            registerInteractive(instanced, 'ribossomos');
+            riboGroup.add(instanced);
+            animatedObjects.freeRibosomes = instanced;
+        }
+
+        /**
+         * 9. LISOSSOMOS E PEROXISSOMOS
+         */
+        function buildLysosomes() {
+            const lysoGroup = new THREE.Group();
+            organelleGroups['lisossomos'] = lysoGroup;
+            cellRootGroup.add(lysoGroup);
+
+            const positions = [
+                { pos: new THREE.Vector3(-1.4, -2.3, 2.4), r: 0.34, color: 0xc084fc, emissive: 0x6b21a8 },
+                { pos: new THREE.Vector3(1.1, -2.7, 1.3), r: 0.28, color: 0xa855f7, emissive: 0x581c87 },
+                { pos: new THREE.Vector3(-2.7, 0.6, 2.8), r: 0.30, color: 0xd946ef, emissive: 0x701a75 },
+                { pos: new THREE.Vector3(3.1, 0.3, 1.1), r: 0.27, color: 0x38bdf8, emissive: 0x0369a1 },
+                { pos: new THREE.Vector3(-1.8, 2.5, -2.1), r: 0.31, color: 0xc084fc, emissive: 0x6b21a8 }
+            ];
+
+            positions.forEach((item) => {
+                const mat = new THREE.MeshPhysicalMaterial({
+                    color: item.color,
+                    emissive: item.emissive,
+                    emissiveIntensity: 0.45,
+                    roughness: 0.2,
+                    metalness: 0.05,
+                    clearcoat: 0.8
+                });
+                const sphere = new THREE.Mesh(new THREE.SphereGeometry(item.r, 24, 24), mat);
+                sphere.position.copy(item.pos);
+                registerInteractive(sphere, 'lisossomos');
+                lysoGroup.add(sphere);
+            });
+        }
+
+        /**
+         * 10. CENTRÍOLOS / CENTROSSOMO (PAR DE CILINDROS PERPENDICULARES DE MICROTÚBULOS)
+         */
+        function buildCentrioles() {
+            const centrioleGroup = new THREE.Group();
+            centrioleGroup.position.set(1.5, 2.1, -0.7);
+            organelleGroups['centriolos'] = centrioleGroup;
+            cellRootGroup.add(centrioleGroup);
+
+            const rodMat = new THREE.MeshPhongMaterial({
+                color: 0xfacc15,
+                emissive: 0x854d0e,
+                emissiveIntensity: 0.45,
+                shininess: 90
+            });
+
+            // Função auxiliar para montar um barril de 9 tripletos de microtúbulos
+            function createBarrel() {
+                const barrel = new THREE.Group();
+                const triplets = 9;
+                const radius = 0.22;
+                const length = 0.68;
+                const rodGeo = new THREE.CylinderGeometry(0.024, 0.024, length, 6);
+
+                for (let i = 0; i < triplets; i++) {
+                    const angle = (i / triplets) * Math.PI * 2;
+                    for (let t = -1; t <= 1; t++) {
+                        const subAngle = angle + t * 0.11;
+                        const subR = radius + t * 0.025;
+                        const rod = new THREE.Mesh(rodGeo, rodMat);
+                        rod.position.set(Math.cos(subAngle) * subR, 0, Math.sin(subAngle) * subR);
+                        registerInteractive(rod, 'centriolos');
+                        barrel.add(rod);
+                    }
+                }
+                return barrel;
+            }
+
+            const barrel1 = createBarrel();
+            const barrel2 = createBarrel();
+            barrel2.rotation.set(Math.PI / 2, 0.3, 0);
+            barrel2.position.set(0.32, -0.18, 0.22);
+
+            centrioleGroup.add(barrel1, barrel2);
+        }
+
+        /**
+         * 11. CITOESQUELETO E PARTÍCULAS DO CITOSOL
+         */
+        function buildCytoskeletonAndCytosol() {
+            const cytoGroup = new THREE.Group();
+            organelleGroups['citoesqueleto'] = cytoGroup;
+            cellRootGroup.add(cytoGroup);
+
+            // Microtúbulos estruturais radiando do centrossomo e cruzando o citoplasma
+            const filamentMat = new THREE.MeshBasicMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.22
+            });
+
+            const filamentCurves = [
+                [new THREE.Vector3(1.5, 2.1, -0.7), new THREE.Vector3(3.1, 2.4, 0.8), new THREE.Vector3(4.3, 1.5, 2.2)],
+                [new THREE.Vector3(1.5, 2.1, -0.7), new THREE.Vector3(0.2, 3.3, 1.4), new THREE.Vector3(-1.8, 3.6, 2.3)],
+                [new THREE.Vector3(1.5, 2.1, -0.7), new THREE.Vector3(3.5, 0.2, -1.5), new THREE.Vector3(4.1, -2.0, -0.5)],
+                [new THREE.Vector3(-3.2, -0.5, 2.5), new THREE.Vector3(-1.2, -3.1, 2.8), new THREE.Vector3(1.8, -3.2, 2.4)],
+                [new THREE.Vector3(-2.5, 2.2, 2.6), new THREE.Vector3(-3.6, 0.1, 2.9), new THREE.Vector3(-2.8, -2.2, 2.7)]
+            ];
+
+            filamentCurves.forEach((pts) => {
+                const curve = new THREE.CatmullRomCurve3(pts);
+                const tubeGeo = new THREE.TubeGeometry(curve, 32, 0.022, 6, false);
+                const mesh = new THREE.Mesh(tubeGeo, filamentMat);
+                registerInteractive(mesh, 'citoesqueleto');
+                cytoGroup.add(mesh);
+            });
+
+            // Partículas luminosas sutis suspensas no citosol (íons, ATP, enzimas)
+            const pCount = 240;
+            const pGeo = new THREE.BufferGeometry();
+            const pPositions = new Float32Array(pCount * 3);
+
+            for (let i = 0; i < pCount; i++) {
+                const r = 1.9 + Math.random() * 2.9;
+                const theta = Math.random() * Math.PI;
+                const phi = Math.random() * Math.PI * 2;
+                pPositions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+                pPositions[i * 3 + 1] = r * Math.cos(theta);
+                pPositions[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
+            }
+            pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+
+            const pMat = new THREE.PointsMaterial({
+                color: 0x7dd3fc,
+                size: 0.065,
+                transparent: true,
+                opacity: 0.45
+            });
+            const points = new THREE.Points(pGeo, pMat);
+            cytoGroup.add(points);
+            animatedObjects.cytosolParticles = points;
+        }
+
+        /**
+         * ============================================================================
+         * INTERFACE DO USUÁRIO, LISTA DE ORGANELAS E RÓTULOS FLUTUANTES
+         * ============================================================================
+         */
+        function initUI() {
+            const listContainer = document.getElementById('organelle-list');
+            const labelsLayer = document.getElementById('labels-layer');
+
+            Object.values(ORGANELLE_DATA).forEach((org) => {
+                // 1. Botão na lista lateral
+                const btn = document.createElement('button');
+                btn.id = `list-btn-${org.id}`;
+                btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/50 text-left transition group';
+                btn.innerHTML = `
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125" style="background-color: ${org.color}; box-shadow: 0 0 8px ${org.color};"></span>
+                    <span class="text-xs font-medium text-slate-200 group-hover:text-white truncate">${org.shortName}</span>
+                `;
+                btn.addEventListener('click', () => selectOrganelle(org.id, true));
+                listContainer.appendChild(btn);
+
+                // 2. Rótulo flutuante em 3D
+                const tag = document.createElement('div');
+                tag.className = 'label-3d px-2.5 py-1 rounded-full bg-slate-900/85 border border-slate-600/70 text-[11px] font-medium text-slate-100 shadow-lg backdrop-blur-sm flex items-center gap-1.5';
+                tag.innerHTML = `
+                    <span class="w-2 h-2 rounded-full" style="background-color: ${org.color};"></span>
+                    <span>${org.shortName}</span>
+                `;
+                tag.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectOrganelle(org.id, true);
+                });
+                labelsLayer.appendChild(tag);
+                labelElements[org.id] = tag;
+            });
+
+            // Eventos dos Botões de Controle
+            document.getElementById('btn-zoom-in').addEventListener('click', () => {
+                camControl.isAutoFocusing = false;
+                camControl.targetRadius = Math.max(camControl.minRadius, camControl.targetRadius - 2.2);
+            });
+
+            document.getElementById('btn-zoom-out').addEventListener('click', () => {
+                camControl.isAutoFocusing = false;
+                camControl.targetRadius = Math.min(camControl.maxRadius, camControl.targetRadius + 2.2);
+            });
+
+            document.getElementById('btn-reset-cam').addEventListener('click', () => {
+                resetCameraAndSelection();
+            });
+
+            const btnLabels = document.getElementById('btn-toggle-labels');
+            btnLabels.addEventListener('click', () => {
+                state.showLabels = !state.showLabels;
+                btnLabels.textContent = state.showLabels ? 'Rótulos: ON' : 'Rótulos: OFF';
+                btnLabels.className = state.showLabels
+                    ? 'px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition'
+                    : 'px-2.5 py-1.5 rounded-lg hover:bg-slate-700 text-slate-300 text-xs font-medium transition';
+                document.getElementById('labels-layer').style.display = state.showLabels ? 'block' : 'none';
+            });
+
+            const btnCutaway = document.getElementById('btn-toggle-cutaway');
+            btnCutaway.addEventListener('click', () => {
+                state.isCutaway = !state.isCutaway;
+                animatedObjects.cutawayGroup.visible = state.isCutaway;
+                animatedObjects.fullShellMesh.visible = !state.isCutaway;
+                btnCutaway.textContent = state.isCutaway ? 'Corte 3D' : 'Membrana Cheia';
+            });
+
+            const btnAnim = document.getElementById('btn-toggle-anim');
+            btnAnim.addEventListener('click', () => {
+                state.isAnimating = !state.isAnimating;
+                btnAnim.textContent = state.isAnimating ? 'Pausar' : 'Animar';
+            });
+
+            const explodeSlider = document.getElementById('explode-slider');
+            explodeSlider.addEventListener('input', (e) => {
+                state.explodeFactor = parseFloat(e.target.value) / 100;
+            });
+
+            // Minimizar/Expandir Painel Lateral
+            const toggleDrawerBtn = document.getElementById('toggle-drawer-btn');
+            const drawerContent = document.getElementById('drawer-content');
+            toggleDrawerBtn.addEventListener('click', () => {
+                state.drawerMinimized = !state.drawerMinimized;
+                drawerContent.style.display = state.drawerMinimized ? 'none' : 'block';
+                toggleDrawerBtn.textContent = state.drawerMinimized ? 'Expandir' : 'Minimizar';
+            });
+
+            // Alternar nota educativa
+            const toggleNoteBtn = document.getElementById('toggle-info-note');
+            const bioNote = document.getElementById('bio-note');
+            toggleNoteBtn.addEventListener('click', () => {
+                bioNote.classList.toggle('hidden');
+            });
+        }
+
+        /**
+         * Seleciona uma organela, atualiza o cartão informativo e foca a câmera
+         */
+        function selectOrganelle(id, focusCamera = true) {
+            const data = ORGANELLE_DATA[id];
+            if (!data) return;
+
+            state.selectedId = id;
+
+            // Atualiza o cartão de detalhes
+            document.getElementById('detail-category').textContent = data.category;
+            document.getElementById('detail-title').textContent = data.name;
+            document.getElementById('detail-desc').textContent = data.description;
+            document.getElementById('detail-function').textContent = data.func;
+            document.getElementById('detail-composition').textContent = data.composition;
+            document.getElementById('detail-color-dot').style.backgroundColor = data.color;
+
+            // Destaca o item ativo na lista lateral
+            Object.keys(ORGANELLE_DATA).forEach((key) => {
+                const btn = document.getElementById(`list-btn-${key}`);
+                if (!btn) return;
+                if (key === id) {
+                    btn.classList.add('bg-cyan-500/20', 'border-cyan-400/60');
+                    btn.classList.remove('bg-slate-800/60', 'border-slate-700/50');
+                } else {
+                    btn.classList.remove('bg-cyan-500/20', 'border-cyan-400/60');
+                    btn.classList.add('bg-slate-800/60', 'border-slate-700/50');
+                }
+            });
+
+            // Expande o painel automaticamente se estiver minimizado
+            if (state.drawerMinimized) {
+                state.drawerMinimized = false;
+                document.getElementById('drawer-content').style.display = 'block';
+                document.getElementById('toggle-drawer-btn').textContent = 'Minimizar';
+            }
+
+            // Calcula ângulos esféricos para aproximar suavemente da organela
+            if (focusCamera) {
+                const target = data.targetPoint.clone().addScaledVector(data.explodeDir, state.explodeFactor);
+                const offset = data.cameraOffset.clone();
+                const dist = offset.length();
+                const phi = Math.acos(THREE.MathUtils.clamp(offset.y / dist, -0.95, 0.95));
+                const theta = Math.atan2(offset.x, offset.z);
+
+                camControl.desiredTarget.copy(target);
+                camControl.targetRadius = dist;
+                camControl.targetPhi = phi;
+                camControl.targetTheta = theta;
+                camControl.isAutoFocusing = true;
+            }
+        }
+
+        function resetCameraAndSelection() {
+            state.selectedId = null;
+            camControl.desiredTarget.set(0, 0, 0);
+            camControl.targetRadius = 15.5;
+            camControl.targetTheta = 0.72;
+            camControl.targetPhi = 1.12;
+            camControl.isAutoFocusing = true;
+
+            document.getElementById('detail-category').textContent = 'Visão Geral';
+            document.getElementById('detail-title').textContent = 'Célula Eucarionte Humana';
+            document.getElementById('detail-desc').textContent = 'Clique em qualquer estrutura no modelo 3D ou na lista abaixo para aproximar a câmera e inspecionar sua morfologia e função fisiológica.';
+            document.getElementById('detail-function').textContent = 'Unidade morfofuncional fundamental dos tecidos humanos.';
+            document.getElementById('detail-composition').textContent = 'Bicamada fosfolipídica, citosol, organelas membranosas e núcleo com DNA.';
+            document.getElementById('detail-color-dot').style.backgroundColor = '#22d3ee';
+
+            Object.keys(ORGANELLE_DATA).forEach((key) => {
+                const btn = document.getElementById(`list-btn-${key}`);
+                if (btn) {
+                    btn.classList.remove('bg-cyan-500/20', 'border-cyan-400/60');
+                    btn.classList.add('bg-slate-800/60', 'border-slate-700/50');
+                }
+            });
+        }
+
+        /**
+         * ============================================================================
+         * CONTROLES DE ÓRBITA, ZOOM E RAYCASTING (MOUSE E TOUCH)
+         * ============================================================================
+         */
+        function initInteractionEvents() {
+            const dom = renderer.domElement;
+            const raycaster = new THREE.Raycaster();
+            const pointer = new THREE.Vector2();
+            const tooltip = document.getElementById('hover-tooltip');
+            const tooltipText = document.getElementById('hover-tooltip-text');
+
+            let downPos = { x: 0, y: 0 };
+
+            // --- MOUSE ---
+            dom.addEventListener('mousedown', (e) => {
+                camControl.isDragging = true;
+                camControl.isAutoFocusing = false;
+                camControl.isPanning = (e.button === 2 || e.shiftKey);
+                camControl.prevMouse = { x: e.clientX, y: e.clientY };
+                downPos = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (camControl.isDragging) {
+                    const dx = e.clientX - camControl.prevMouse.x;
+                    const dy = e.clientY - camControl.prevMouse.y;
+                    camControl.prevMouse = { x: e.clientX, y: e.clientY };
+
+                    if (camControl.isPanning) {
+                        const panSpeed = camControl.radius * 0.0012;
+                        const right = new THREE.Vector3();
+                        const up = new THREE.Vector3();
+                        camera.matrix.extractBasis(right, up, new THREE.Vector3());
+                        camControl.desiredTarget.addScaledVector(right, -dx * panSpeed);
+                        camControl.desiredTarget.addScaledVector(up, dy * panSpeed);
+                    } else {
+                        camControl.targetTheta -= dx * 0.0065;
+                        camControl.targetPhi = THREE.MathUtils.clamp(camControl.targetPhi - dy * 0.0065, 0.15, Math.PI - 0.15);
+                    }
+                    tooltip.classList.add('hidden');
+                    return;
+                }
+
+                // Hover Raycasting
+                pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(pointer, camera);
+                const intersects = raycaster.intersectObjects(interactiveMeshes, false);
+
+                if (intersects.length > 0) {
+                    const hitId = intersects[0].object.userData.organelleId;
+                    if (hitId && ORGANELLE_DATA[hitId]) {
+                        state.hoveredId = hitId;
+                        dom.style.cursor = 'pointer';
+                        tooltipText.textContent = ORGANELLE_DATA[hitId].name;
+                        tooltip.style.left = `${e.clientX + 14}px`;
+                        tooltip.style.top = `${e.clientY + 14}px`;
+                        tooltip.classList.remove('hidden');
+                        return;
+                    }
+                }
+                state.hoveredId = null;
+                dom.style.cursor = 'grab';
+                tooltip.classList.add('hidden');
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (camControl.isDragging) {
+                    const moveDist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+                    // Se foi um clique rápido sem arrastar, seleciona a organela
+                    if (moveDist < 5 && e.button === 0) {
+                        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                        raycaster.setFromCamera(pointer, camera);
+                        const intersects = raycaster.intersectObjects(interactiveMeshes, false);
+                        if (intersects.length > 0 && intersects[0].object.userData.organelleId) {
+                            selectOrganelle(intersects[0].object.userData.organelleId, true);
+                        }
+                    }
+                }
+                camControl.isDragging = false;
+                camControl.isPanning = false;
+            });
+
+            dom.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // Scroll do Mouse para Zoom
+            dom.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                camControl.isAutoFocusing = false;
+                const zoomFactor = 1 + Math.sign(e.deltaY) * 0.1;
+                camControl.targetRadius = THREE.MathUtils.clamp(
+                    camControl.targetRadius * zoomFactor,
+                    camControl.minRadius,
+                    camControl.maxRadius
+                );
+            }, { passive: false });
+
+            // --- TOUCH (MOBILE / TABLET: 1 DEDO GIRA, 2 DEDOS PINÇA ZOOM) ---
+            dom.addEventListener('touchstart', (e) => {
+                camControl.isAutoFocusing = false;
+                if (e.touches.length === 1) {
+                    camControl.isDragging = true;
+                    camControl.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    downPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                } else if (e.touches.length === 2) {
+                    camControl.isDragging = false;
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    camControl.prevPinchDist = Math.hypot(dx, dy);
+                }
+            }, { passive: false });
+
+            dom.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (e.touches.length === 1 && camControl.isDragging) {
+                    const dx = e.touches[0].clientX - camControl.prevMouse.x;
+                    const dy = e.touches[0].clientY - camControl.prevMouse.y;
+                    camControl.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+
+                    camControl.targetTheta -= dx * 0.0075;
+                    camControl.targetPhi = THREE.MathUtils.clamp(camControl.targetPhi - dy * 0.0075, 0.15, Math.PI - 0.15);
+                } else if (e.touches.length === 2) {
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const dist = Math.hypot(dx, dy);
+                    if (camControl.prevPinchDist > 0) {
+                        const scale = camControl.prevPinchDist / dist;
+                        camControl.targetRadius = THREE.MathUtils.clamp(
+                            camControl.targetRadius * scale,
+                            camControl.minRadius,
+                            camControl.maxRadius
+                        );
+                    }
+                    camControl.prevPinchDist = dist;
+                }
+            }, { passive: false });
+
+            dom.addEventListener('touchend', (e) => {
+                if (e.changedTouches.length === 1 && camControl.isDragging) {
+                    const t = e.changedTouches[0];
+                    const moveDist = Math.hypot(t.clientX - downPos.x, t.clientY - downPos.y);
+                    if (moveDist < 8) {
+                        pointer.x = (t.clientX / window.innerWidth) * 2 - 1;
+                        pointer.y = -(t.clientY / window.innerHeight) * 2 + 1;
+                        raycaster.setFromCamera(pointer, camera);
+                        const intersects = raycaster.intersectObjects(interactiveMeshes, false);
+                        if (intersects.length > 0 && intersects[0].object.userData.organelleId) {
+                            selectOrganelle(intersects[0].object.userData.organelleId, true);
+                        }
+                    }
+                }
+                camControl.isDragging = false;
+                camControl.prevPinchDist = 0;
+            });
+        }
+
+        /**
+         * Atualiza a posição da câmera suavemente com amortecimento (damping)
+         */
+        function updateCameraPosition(instant = false) {
+            const lerpFactor = instant ? 1 : 0.085;
+            camControl.radius += (camControl.targetRadius - camControl.radius) * lerpFactor;
+            camControl.theta += (camControl.targetTheta - camControl.theta) * lerpFactor;
+            camControl.phi += (camControl.targetPhi - camControl.phi) * lerpFactor;
+            camControl.target.lerp(camControl.desiredTarget, lerpFactor);
+
+            const sinPhi = Math.sin(camControl.phi);
+            camera.position.set(
+                camControl.target.x + camControl.radius * sinPhi * Math.sin(camControl.theta),
+                camControl.target.y + camControl.radius * Math.cos(camControl.phi),
+                camControl.target.z + camControl.radius * sinPhi * Math.cos(camControl.theta)
+            );
+            camera.lookAt(camControl.target);
+        }
+
+        /**
+         * ============================================================================
+         * LOOP DE ANIMAÇÃO E DINÂMICA CELULAR EM TEMPO REAL
+         * ============================================================================
+         */
+        const clock = new THREE.Clock();
+        const dummyRibosome = new THREE.Object3D();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsed = clock.getElapsedTime();
+
+            // 1. Interpola posição de "Visão Explodida" das organelas
+            Object.values(ORGANELLE_DATA).forEach((org) => {
+                const grp = organelleGroups[org.id];
+                if (!grp || org.id === 'nucleolo') return;
+                const basePos = org.id === 'nucleo' ? new THREE.Vector3(0, 0.3, 0) :
+                                org.id === 'golgi' ? new THREE.Vector3(2.3, -1.3, 2.0) :
+                                org.id === 'centriolos' ? new THREE.Vector3(1.5, 2.1, -0.7) :
+                                new THREE.Vector3(0, 0, 0);
+
+                const desiredPos = basePos.clone().addScaledVector(org.explodeDir, state.explodeFactor);
+                grp.position.lerp(desiredPos, 0.12);
+            });
+
+            // 2. Animações Fisiológicas Dinâmicas
+            if (state.isAnimating) {
+                // Respiração orgânica sutil da célula inteira
+                const breath = 1 + Math.sin(elapsed * 1.4) * 0.012;
+                cellRootGroup.scale.set(breath, 1 + Math.cos(elapsed * 1.2) * 0.01, breath);
+
+                // Pulsação energética das mitocôndrias (produção de ATP)
+                animatedObjects.mitochondria.forEach((mito, idx) => {
+                    const pulse = 1 + Math.sin(elapsed * 3.0 + idx) * 0.035;
+                    mito.scale.setScalar((idx === 0 ? 1.05 : 0.92) * pulse);
+                });
+
+                // Transporte de vesículas secretoras brotando do Complexo de Golgi
+                animatedObjects.vesicles.forEach((ves) => {
+                    const progress = ((elapsed * 0.35 + ves.userData.phase) % 1);
+                    ves.position.set(
+                        ves.userData.lane * 0.55 + Math.sin(progress * 5) * 0.12,
+                        -0.65 - progress * 1.35,
+                        0.3 + progress * 1.45
+                    );
+                    const scale = progress < 0.15 ? progress / 0.15 : (progress > 0.85 ? (1 - progress) / 0.15 : 1);
+                    ves.scale.setScalar(Math.max(0.01, scale));
+                });
+
+                // Movimento Browniano / Ciclose dos ribossomos livres no citosol
+                if (animatedObjects.freeRibosomes) {
+                    animatedObjects.ribosomeBasePositions.forEach((item, i) => {
+                        dummyRibosome.position.set(
+                            item.base.x + Math.sin(elapsed * item.speed + item.phase) * 0.08,
+                            item.base.y + Math.cos(elapsed * item.speed * 0.9 + item.phase) * 0.08,
+                            item.base.z + Math.sin(elapsed * item.speed * 1.1 + item.phase) * 0.08
+                        );
+                        dummyRibosome.updateMatrix();
+                        animatedObjects.freeRibosomes.setMatrixAt(i, dummyRibosome.matrix);
+                    });
+                    animatedObjects.freeRibosomes.instanceMatrix.needsUpdate = true;
+                }
+
+                // Rotação muito lenta das partículas do citosol
+                if (animatedObjects.cytosolParticles) {
+                    animatedObjects.cytosolParticles.rotation.y = elapsed * 0.04;
+                }
+            }
+
+            // 3. Atualiza câmera
+            updateCameraPosition(false);
+
+            // 4. Projeta rótulos 3D na tela 2D
+            updateProjectedLabels();
+
+            // 5. Renderiza o quadro
+            renderer.render(scene, camera);
+        }
+
+        /**
+         * Converte coordenadas 3D das organelas para coordenadas 2D de tela para os rótulos flutuantes
+         */
+        function updateProjectedLabels() {
+            if (!state.showLabels) return;
+
+            const widthHalf = window.innerWidth * 0.5;
+            const heightHalf = window.innerHeight * 0.5;
+            const tempVec = new THREE.Vector3();
+
+            Object.values(ORGANELLE_DATA).forEach((org) => {
+                const el = labelElements[org.id];
+                if (!el) return;
+
+                tempVec.copy(org.targetPoint).addScaledVector(org.explodeDir, state.explodeFactor);
+                tempVec.project(camera);
+
+                // Oculta rótulo se estiver atrás da câmera
+                if (tempVec.z > 1) {
+                    el.style.opacity = '0';
+                    el.style.pointerEvents = 'none';
+                    return;
+                }
+
+                const x = (tempVec.x * widthHalf) + widthHalf;
+                const y = -(tempVec.y * heightHalf) + heightHalf;
+
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                el.style.opacity = (state.selectedId && state.selectedId !== org.id) ? '0.55' : '0.95';
+                el.style.pointerEvents = 'auto';
+            });
+        }
+    </script>
+</body>
+</html>
